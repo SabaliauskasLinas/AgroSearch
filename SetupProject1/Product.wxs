@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="AgroSearch" Language="1033" Version="3.0" Manufacturer='UAB "Erlin"' UpgradeCode="243A3695-2B24-46C4-BF89-4AD464244C7F">
+
+    <Package InstallerVersion="400" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
+
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes"  />
+
+    <WixVariable Id="WixUILicenseRtf" Value="InstallFiles/License.rtf" />
+    <Property Id="WIXUI_INSTALLDIR" Value="CUSTOMINSTALLDIR" />
+    <Property Id="INSTALLLEVEL" Value="5" />
+    <Property Id="WixShellExecTarget" Value="[#AgroAdd.exe]" />
+    <SetDirectory Id="WINDOWSVOLUME" Value="[WindowsVolume]"/>
+
+    <UI>
+      <UIRef Id="WixUI_Minimal" />
+    </UI>
+
+    <Feature Id="ProductFeature" Title="AgroAdd.exe" Level="1" InstallDefault="local" Absent="disallow" AllowAdvertise="no">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="WINDIR" Name="[WindowsFolder]"></Directory>
+      <Directory Id="WINDOWSVOLUME" Name="[WindowsVolume]">
+         <Directory Id="INSTALLFOLDER" Name="AgroSearch">
+           <Directory Id="ImagesDir" Name="Images" />
+         </Directory>
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents">
+
+      <!-- main components-->
+      <Component Id="MainExe" Directory="INSTALLFOLDER" Guid="357688AD-D52B-4663-BBED-2424FA2DFE76">
+        <File Id="AgroSearch.exe" Name="AgroSearch.exe" Source="$(var.AgroAdd.TargetPath)" DiskId="1" Checksum="yes" KeyPath="yes"/>
+        <File Id="AgroSearch.exe.config" Name="AgroSearch.exe.config" Source="$(var.AgroAdd.TargetDir)AgroAdd.exe.config" DiskId="1" Checksum="yes" />
+        <File Id="Newtonsoft.Json.dll" Name="Newtonsoft.Json.dll" Source="$(var.AgroAdd.TargetDir)Newtonsoft.Json.dll" DiskId="1" Checksum="yes" />
+        <File Id="Naudojimas.txt" Name="Naudojimas.txt" Source="$(var.AgroAdd.TargetDir)Naudojimas.txt" DiskId="1" Checksum="yes" />
+      </Component>
+
+      <!-- images folder -->
+      <Component Id="Images" Directory="ImagesDir" Guid="D5F6C186-8F0B-4670-B228-7164689FBA30">
+        <File Id="logo.png" Name="logo.jpg" Source="$(var.AgroAdd.TargetDir)Images\logo.png" DiskId="1" Checksum="yes" KeyPath="yes" />
+        <File Id="noimage.png" Name="noimage.png" Source="$(var.AgroAdd.TargetDir)Images\noimage.png" DiskId="1" Checksum="yes" />
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+</Wix>
