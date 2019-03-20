@@ -255,7 +255,9 @@ namespace AgroAdd.ViewModels
                 OnPropertyChanged(nameof(FilterRequiredVisibility));
             }
         }
-
+        /// <summary>
+        /// //////////////////////////
+        /// </summary>
         public DelegateCommand SearchCommand { get; private set; }
         public DelegateCommand SwitchPageCommand { get; private set; }
         public DelegateCommand RefreshCommand { get; private set; }
