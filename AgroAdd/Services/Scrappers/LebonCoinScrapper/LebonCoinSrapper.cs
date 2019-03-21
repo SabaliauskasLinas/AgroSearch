@@ -32,7 +32,7 @@ namespace AgroAdd.Services.Scrappers.LebonCoinScrapper
             _httpClient = new HttpClient();
         }
 
-        public void ScrapAsync(string query, string filters, int? costmin, int? costmax, int page = 1)
+        public void ScrapAsync(string query, string synonyms, bool filtering, int? costmin, int? costmax, int page = 1)
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
             try

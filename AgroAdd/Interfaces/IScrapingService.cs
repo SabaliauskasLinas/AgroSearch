@@ -17,6 +17,6 @@ namespace AgroAdd.Interfaces
         bool IsCompany { get; }
         bool RequiresText { get; }
         event ScrapCompleted AsyncScrapCompleted;
-        void ScrapAsync(string query, string filters, int? costmin, int? costmax, int page = 1);
+        void ScrapAsync(string query, string synonyms, bool filtering, int? costmin, int? costmax, int page = 1);
     }
 }

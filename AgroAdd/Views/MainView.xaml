@@ -54,14 +54,13 @@
                 <DockPanel DockPanel.Dock="Top">
                     <StackPanel Orientation="Vertical">
                         <StackPanel>
-                            <TextBlock Text="Pavadinimas:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
+                            <TextBlock Text="Užklausa:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
                             <TextBox Name ="searchTextBox" TextAlignment="Center"  Text="{Binding SearchText}" Width="150"/>
                             <TextBlock Text="Filtrai:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
                             <TextBox Name ="searchFilterTextBox" TextAlignment="Center"  Text="{Binding SearchFilterText}" TextWrapping="Wrap" AcceptsReturn="True" Margin="5,0,5,5"/>
                         </StackPanel>
                         <Label Content="* Reikia teksto" Visibility="{Binding FilterRequiredVisibility}" HorizontalAlignment="Center" Foreground="#FFD30000"></Label>
                     </StackPanel>
-                    
                 </DockPanel>
                 <!--Duomenys Iš-->
                 <DockPanel DockPanel.Dock="Top">
@@ -105,7 +104,10 @@
                 <!--Nuo Iki-->
                 <DockPanel DockPanel.Dock="Top">
                     <StackPanel>
-                        <Label Content="su * nereikia teksto" Height="23" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF6E1B1B" Foreground="#FFBDA385"/>
+                        <StackPanel>
+                            <TextBlock Text="su * nereikia teksto" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FF6E1B1B" Foreground="#FF856E52"/>
+                            <CheckBox Content="Pavadinimas privalo turėti užklausą" IsChecked="{Binding IsFilteringChecked,FallbackValue=true}" Foreground="#FFBDA385"></CheckBox>
+                        </StackPanel>
                         <TextBlock Margin="0,3,0,0" Text="Kaina (Eurais)" Foreground="#FFBDA385" FontSize="18" FontWeight="Medium" HorizontalAlignment="Center"></TextBlock>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <WrapPanel Orientation="Vertical">
@@ -126,7 +128,7 @@
                             <ComboBox>
                                 <ComboBoxItem IsSelected="True">Nerikiuoti</ComboBoxItem>
                                 <ComboBoxItem IsSelected="{Binding IsTheCheapestSelected}">Pigiausi viršuje</ComboBoxItem>
-                                <ComboBoxItem IsSelected="{Binding IsTheMostExprensiveSelected}">Brangiausi viršuje</ComboBoxItem>
+                                <ComboBoxItem IsSelected="{Binding IsTheMostExpensiveSelected}">Brangiausi viršuje</ComboBoxItem>
                             </ComboBox>
                         </WrapPanel>
                         <WrapPanel>

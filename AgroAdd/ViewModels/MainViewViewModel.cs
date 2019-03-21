@@ -30,7 +30,8 @@ namespace AgroAdd.ViewModels
         private bool _isSearching;
         private bool _isRefreshing;
         private bool _isTheCheapestSelected;
-        private bool _isTheMostExprensiveSelected;
+        private bool _isTheMostExpensiveSelected;
+        private bool _isFilteringChecked = true;
         private string _searchText;
         private string _searchFilterText;
         private int? _scrapperProgressBarValue;
@@ -107,13 +108,22 @@ namespace AgroAdd.ViewModels
                 OnPropertyChanged(nameof(IsTheCheapestSelected));
             }
         }
-        public bool IsTheMostExprensiveSelected
+        public bool IsTheMostExpensiveSelected
         {
-            get => _isTheMostExprensiveSelected;
+            get => _isTheMostExpensiveSelected;
             set
             {
-                _isTheMostExprensiveSelected = value;
-                OnPropertyChanged(nameof(IsTheMostExprensiveSelected));
+                _isTheMostExpensiveSelected = value;
+                OnPropertyChanged(nameof(IsTheMostExpensiveSelected));
+            }
+        }
+        public bool IsFilteringChecked
+        {
+            get => _isFilteringChecked;
+            set
+            {
+                _isFilteringChecked = value;
+                OnPropertyChanged(nameof(IsFilteringChecked));
             }
         }
         public bool CanSearch
@@ -296,7 +306,7 @@ namespace AgroAdd.ViewModels
                         CheckedScrappersCount = 1;
                     scrapper.IsFinished = false;
                     scrapper.SearchResults = "...";
-                    scrapper.Model.ScrapAsync(SearchText, SearchFilterText, CostMin, CostMax, PageIndex);
+                    scrapper.Model.ScrapAsync(SearchText, SearchFilterText, IsFilteringChecked, CostMin, CostMax, PageIndex);
                 }
             }
         }
@@ -358,7 +368,7 @@ namespace AgroAdd.ViewModels
                     {
                         CheckedScrappersCount++;
                         scrapper.SearchResults = "...";
-                        scrapper.Model.ScrapAsync(SearchText, SearchFilterText, CostMin, CostMax, PageIndex);
+                        scrapper.Model.ScrapAsync(SearchText, SearchFilterText, IsFilteringChecked, CostMin, CostMax, PageIndex);
                     }
                 }
             }
@@ -378,7 +388,7 @@ namespace AgroAdd.ViewModels
                 {
                     scrapper.IsFinished = false;
                     scrapper.SearchResults = "rr";
-                    scrapper.Model.ScrapAsync(SearchText, SearchFilterText, CostMin, CostMax, PageIndex);
+                    scrapper.Model.ScrapAsync(SearchText, SearchFilterText, IsFilteringChecked, CostMin, CostMax, PageIndex);
                 }
             }
         }
@@ -510,7 +520,7 @@ namespace AgroAdd.ViewModels
             _unpagedAdvertisements.AddRange(results.Select(x => new AdvertisementViewModel(x)));
             if (IsTheCheapestSelected)
                 _unpagedAdvertisements = _unpagedAdvertisements.OrderBy(x => x, _comparer).ToList();
-            if (IsTheMostExprensiveSelected)
+            if (IsTheMostExpensiveSelected)
                 _unpagedAdvertisements = _unpagedAdvertisements.OrderByDescending(x => x, _comparer).ToList();
 
             UpdatePage();
