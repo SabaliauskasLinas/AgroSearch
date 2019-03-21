@@ -11,25 +11,19 @@ using System.Windows.Media;
 
 namespace AgroAdd.Views
 {
-    /// <summary>
-    /// Interaction logic for MainView.xaml
-    /// </summary>
     public partial class MainView : Window
     {
         private readonly LoggingService _loggingService;
-        private int _scroolState;
 
         public MainView(LoggingService loggingService, ScrapperProvider scrapperProvider)
         {
-            WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
             _loggingService = loggingService;
             InitializeComponent();
             DataContext = new MainViewViewModel(loggingService, scrapperProvider);
             (DataContext as MainViewViewModel).PropertyChanged += MainViewPropertyChanged;
             KeyUp += OnWindowKeyUp;
             ((MainViewViewModel)DataContext).UpdateFocus += OnUpdateFocus;
-            //KeyDown += OnWindowKeyDown;
-
         }
 
         private void OnUpdateFocus(object sender)
@@ -51,38 +45,32 @@ namespace AgroAdd.Views
 
             if (e.Key == Key.Left && 
                 context.PreviousSubPageCommand.CanExecute(1) && 
-                !manufacturerTextBox.IsFocused && 
-                !modelTextBox.IsFocused && 
-                !manufacturerFilterTextBox.IsFocused && 
-                !modelFilterTextBox.IsFocused)
+                !searchTextBox.IsFocused &&
+                !searchFilterTextBox.IsFocused)
             {
                 context.PreviousSubPageCommand.Execute(1);
                 return;
             }
             if (e.Key == Key.Right && 
-                context.NextSubPageCommand.CanExecute(1) && 
-                !manufacturerTextBox.IsFocused && 
-                !modelTextBox.IsFocused && 
-                !manufacturerFilterTextBox.IsFocused && 
-                !modelFilterTextBox.IsFocused)
+                context.NextSubPageCommand.CanExecute(1) &&
+                !searchTextBox.IsFocused &&
+                !searchFilterTextBox.IsFocused)
             {
                 context.NextSubPageCommand.Execute(1);
                 return;
             }
             if (e.Key == Key.NumPad1 && 
-                context.SwitchPageCommand.CanExecute(-1) && 
-                !manufacturerTextBox.IsFocused && 
-                !modelTextBox.IsFocused && 
-                !manufacturerFilterTextBox.IsFocused && 
-                !modelFilterTextBox.IsFocused)
+                context.SwitchPageCommand.CanExecute(-1) &&
+                !searchTextBox.IsFocused &&
+                !searchFilterTextBox.IsFocused)
             {
                 context.SwitchPageCommand.Execute(-1);
                 return;
             }
-            if (e.Key == Key.NumPad3 && context.SwitchPageCommand.CanExecute(1) && 
-                !manufacturerTextBox.IsFocused && !modelTextBox.IsFocused && 
-                !manufacturerFilterTextBox.IsFocused && 
-                !modelFilterTextBox.IsFocused)
+            if (e.Key == Key.NumPad3 && 
+                context.SwitchPageCommand.CanExecute(1) &&
+                !searchTextBox.IsFocused &&
+                !searchFilterTextBox.IsFocused)
             {
                 context.SwitchPageCommand.Execute(1);
                 return;
@@ -94,7 +82,6 @@ namespace AgroAdd.Views
         {
             if (e.PropertyName != "SubPageIndex" && e.PropertyName != "PageIndex")
                 return;
-            _scroolState = 0;
 
             try
             {

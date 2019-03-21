@@ -31,10 +31,8 @@ namespace AgroAdd.ViewModels
         private bool _isRefreshing;
         private bool _isTheCheapestSelected;
         private bool _isTheMostExprensiveSelected;
-        private string _searchManufacturerText;
-        private string _searchModelText;
-        private string _manufacturerFilters;
-        private string _modelFilters;
+        private string _searchText;
+        private string _searchFilterText;
         private int? _scrapperProgressBarValue;
         private int? _checkedScrappersCount;
         private double _memoryProgressBarValue;
@@ -155,40 +153,22 @@ namespace AgroAdd.ViewModels
             }
         }
         public int TotalSubPages => (int)Math.Ceiling((_unpagedAdvertisements.Count() + 1) / (decimal)_subPageSize);
-        public string SearchManufacturerText
+        public string SearchText
         {
-            get => _searchManufacturerText;
+            get => _searchText;
             set
             {
-                _searchManufacturerText = value;
-                OnPropertyChanged(nameof(SearchManufacturerText), SwitchPageCommand);
+                _searchText = value;
+                OnPropertyChanged(nameof(SearchText), SwitchPageCommand);
             }
         }
-        public string SearchModelText
+        public string SearchFilterText
         {
-            get => _searchModelText;
+            get => _searchFilterText;
             set
             {
-                _searchModelText = value;
-                OnPropertyChanged(nameof(SearchModelText), SwitchPageCommand);
-            }
-        }
-        public string ManufacturerFilters
-        {
-            get => _manufacturerFilters;
-            set
-            {
-                _manufacturerFilters = value;
-                OnPropertyChanged(nameof(ManufacturerFilters), SwitchPageCommand);
-            }
-        }
-        public string ModelFilters
-        {
-            get => _modelFilters;
-            set
-            {
-                _modelFilters = value;
-                OnPropertyChanged(nameof(ModelFilters), SwitchPageCommand);
+                _searchFilterText = value;
+                OnPropertyChanged(nameof(SearchFilterText), SwitchPageCommand);
             }
         }
         public int? CostMin
@@ -255,9 +235,6 @@ namespace AgroAdd.ViewModels
                 OnPropertyChanged(nameof(FilterRequiredVisibility));
             }
         }
-        /// <summary>
-        /// //////////////////////////
-        /// </summary>
         public DelegateCommand SearchCommand { get; private set; }
         public DelegateCommand SwitchPageCommand { get; private set; }
         public DelegateCommand RefreshCommand { get; private set; }
@@ -281,7 +258,7 @@ namespace AgroAdd.ViewModels
             if (_scrappers.All(x => !x.IsChecked))
                 return;
 
-            if ((string.IsNullOrWhiteSpace(SearchManufacturerText) || string.IsNullOrWhiteSpace(SearchModelText)) && _scrappers.Where(x => x.IsChecked).Any(x => x.RequiresText))
+            if (string.IsNullOrWhiteSpace(SearchText) && _scrappers.Where(x => x.IsChecked).Any(x => x.RequiresText))
             {
                 FilterRequiredVisibility = Visibility.Visible;
                 return;
@@ -319,8 +296,7 @@ namespace AgroAdd.ViewModels
                         CheckedScrappersCount = 1;
                     scrapper.IsFinished = false;
                     scrapper.SearchResults = "...";
-                    scrapper.Model.ScrapAsync(SearchManufacturerText + " " + SearchModelText, CostMin, CostMax, PageIndex);
-
+                    scrapper.Model.ScrapAsync(SearchText, SearchFilterText, CostMin, CostMax, PageIndex);
                 }
             }
         }
@@ -337,7 +313,7 @@ namespace AgroAdd.ViewModels
             if (_pageIndex + pageIndex < 1)
                 return;
 
-            if ((string.IsNullOrWhiteSpace(SearchManufacturerText) || string.IsNullOrWhiteSpace(SearchModelText)) && _scrappers.Where(x => x.IsChecked).Any(x => x.RequiresText))
+            if (string.IsNullOrWhiteSpace(SearchText) && _scrappers.Where(x => x.IsChecked).Any(x => x.RequiresText))
             {
                 FilterRequiredVisibility = Visibility.Visible;
                 return;
@@ -382,7 +358,7 @@ namespace AgroAdd.ViewModels
                     {
                         CheckedScrappersCount++;
                         scrapper.SearchResults = "...";
-                        scrapper.Model.ScrapAsync(SearchManufacturerText + " " + SearchModelText, CostMin, CostMax, PageIndex);
+                        scrapper.Model.ScrapAsync(SearchText, SearchFilterText, CostMin, CostMax, PageIndex);
                     }
                 }
             }
@@ -402,7 +378,7 @@ namespace AgroAdd.ViewModels
                 {
                     scrapper.IsFinished = false;
                     scrapper.SearchResults = "rr";
-                    scrapper.Model.ScrapAsync(SearchManufacturerText + " " + SearchModelText, CostMin, CostMax, PageIndex);
+                    scrapper.Model.ScrapAsync(SearchText, SearchFilterText, CostMin, CostMax, PageIndex);
                 }
             }
         }

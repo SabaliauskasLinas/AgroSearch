@@ -53,24 +53,12 @@
                 <!--Modelio Pavadinimas-->
                 <DockPanel DockPanel.Dock="Top">
                     <StackPanel Orientation="Vertical">
-                        <UniformGrid>
-                            <StackPanel>
-                                    <TextBlock Text="Gamintojas:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
-                                    <TextBox Name ="manufacturerTextBox" TextAlignment="Center"  Text="{Binding SearchManufacturerText}" Width="80"/>
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Text="Modelis:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"/>
-                                    <TextBox Name ="modelTextBox" TextAlignment="Center" Text="{Binding SearchModelText}" Width="80"/>
-                                </StackPanel>
-                            <StackPanel>
-                                <TextBlock Text="Gamintojo filtrai:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
-                                <TextBox Name ="manufacturerFilterTextBox" TextAlignment="Center"  Text="{Binding ManufacturerFilters}" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock Text="Modelio filtrai:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
-                                <TextBox Name ="modelFilterTextBox" TextAlignment="Center"  Text="{Binding ModelFilters}" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            </StackPanel>
-                        </UniformGrid>
+                        <StackPanel>
+                            <TextBlock Text="Pavadinimas:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
+                            <TextBox Name ="searchTextBox" TextAlignment="Center"  Text="{Binding SearchText}" Width="150"/>
+                            <TextBlock Text="Filtrai:" Foreground="#FFBDA385" FontSize="15" FontWeight="Bold" FontFamily="Roboto" HorizontalAlignment="Center"></TextBlock>
+                            <TextBox Name ="searchFilterTextBox" TextAlignment="Center"  Text="{Binding SearchFilterText}" TextWrapping="Wrap" AcceptsReturn="True" Margin="5,0,5,5"/>
+                        </StackPanel>
                         <Label Content="* Reikia teksto" Visibility="{Binding FilterRequiredVisibility}" HorizontalAlignment="Center" Foreground="#FFD30000"></Label>
                     </StackPanel>
                     

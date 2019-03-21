@@ -37,7 +37,7 @@ namespace AgroAdd.Services.Scrappers
 
         public event ScrapCompleted AsyncScrapCompleted;
 
-        public void ScrapAsync(string query, int? costmin, int? costmax, int page = 1)
+        public void ScrapAsync(string query, string filters, int? costmin, int? costmax, int page = 1)
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
