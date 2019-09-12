@@ -17,6 +17,9 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
         private bool _scrapDone;
 
         public string ServiceName => "Baywaboerse.com";
@@ -37,7 +40,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             try
             {
                 if (_scrapBrowser == null)
@@ -62,6 +68,10 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
                 return;
             IEnumerable<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -86,6 +96,33 @@ namespace AgroAdd.Services.Scrappers
                     var info = add.ElementsByClass("div", "padded-box-horizontal")?.FirstOrDefault();
                     if (info == null)
                         continue;
+                    var title = SafeExtrctTitle(info);
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     var price = add.ElementsByClass("div", "price")?.FirstOrDefault();
                     var realPrice = price?.ElementsByClass("span", "priceStr")?.FirstOrDefault()?.InnerText;
                     if (realPrice == null)
@@ -102,12 +139,13 @@ namespace AgroAdd.Services.Scrappers
                                 continue;
                         }
                     }
-                    var title = SafeExtrctTitle(info);
                     var description = info.ElementsByClass("div", "desc").FirstOrDefault()?.InnerText + add.ElementsByClass("div", "location").FirstOrDefault()?.InnerText;
                     var divImg = add.ElementsByClass("div", "image")?.FirstOrDefault();
-                    var src = SafeExtractSrc(divImg);
+                    string src = SafeExtractSrc(divImg);
                     if (src == null || src == " " || src == "")
                         src = "Images/noimage.png";
+                    else if (!src.Contains("http"))
+                        src = "https://www.baywaboerse.com/" + src;
                     var href = SafeExtractHref(add);
 
 
@@ -116,7 +154,7 @@ namespace AgroAdd.Services.Scrappers
                         Name = title,
                         Description = description,
                         Price = realPrice,
-                        ImageUrl = "https://www.baywaboerse.com/" + src,
+                        ImageUrl = src,
                         PageUrl = href,
                     });
                 }

@@ -15,9 +15,12 @@ namespace AgroAdd.Services.Scrappers
     {
         private readonly LoggingService _loggingService;
         private WebBrowser _scrapBrowser;
-        private bool _scrapDone;
         private int? _lastCostMin;
         private int? _lastCostMax;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
+        private bool _scrapDone;
 
         public string ServiceName => "Europe-Agroculture.com";
         public string Country => "EU";
@@ -34,9 +37,12 @@ namespace AgroAdd.Services.Scrappers
 
         public void ScrapAsync(string query, string synonyms, bool filtering, int? costmin, int? costmax, int page = 1)
         {
-            _scrapDone = false;
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
+            _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             if (_scrapBrowser == null)
             {
                 _scrapBrowser = new WebBrowser();
@@ -61,6 +67,10 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
                 return;
             IEnumerable<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -84,42 +94,54 @@ namespace AgroAdd.Services.Scrappers
                     var divTit = add.ElementsByClass("div", "title")?.FirstOrDefault();
                     if (divTit == null)
                         continue;
-                    var title = divTit.ElementsByClass("h3", "bold")?.FirstOrDefault()?.InnerText;
-                    var divDivDes = add.ElementsByClass("div", "row")?.FirstOrDefault();
-                    var divDes = divDivDes.ElementsByClass("div", "description")?.FirstOrDefault();
-                    var description =divDes?.InnerText;
-                    description = description?.Remove(description.IndexOf("Save"));
-                    var identifier = divDes?.ElementsByClass("span", "hidden-gallery")?.FirstOrDefault()?.InnerText;
-                    var price = "";
-                    if (identifier.ToString().ToLower().Contains("auction sale"))
+                    var title = divTit?.InnerText;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
                     {
-                        price = identifier.ToString();
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
                     }
+                    if (continueFlag) continue;
+                    var description = add?.ElementsByClass("div","listing-infos")?.FirstOrDefault()?.InnerText;
+                    var price = add?.ElementsByClass("div", "listing-price")?.FirstOrDefault()?.InnerText;
+                    if (price == null)
+                        price = "POA";
                     else
                     {
-                        price = divDes.ElementsByClass("span", "text-bold")?.FirstOrDefault()?.InnerText;
-
-                            if (price == null)
-                                price = "POA";
-                            else
-                            {
-                                price = price.Replace(",", "").Replace("€", "");
-                                if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
-                                {
-                                    price = decimalPrice.ToString("#,##0") + " €";
-                                    if (decimalPrice <  _lastCostMin)
-                                        continue;
-                                if (decimalPrice >  _lastCostMax)
-                                    continue;
-                                }
-                            }
-
+                        price = price.Replace(",", "").Replace("€", "");
+                        if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
+                        {
+                            price = decimalPrice.ToString("#,##0") + " €";
+                            if (decimalPrice <  _lastCostMin)
+                                continue;
+                            if (decimalPrice >  _lastCostMax)
+                                continue;
+                        }
                     }
                     var divImg = add.ElementsByClass("div", "picture")?.FirstOrDefault();
                     var src = SafeExtratImgSrc(divImg);
                     if (src == null || src == " " || src == "")
                         src = "Images/noimage.png";
-                    var href = SafeExtractHref(divTit);
+                    var href = SafeExtractHref(add);
                     results.Add(new Advertisement
                     {
                         Name = title,
@@ -138,14 +160,6 @@ namespace AgroAdd.Services.Scrappers
                 _loggingService.LogException(ex, "Unhandled exception in ScrapBrowserLoadCompleted");
                 AsyncScrapCompleted?.Invoke(this, null, false, "Unhandled exception");
             }
-            /*finally
-            {
-                if (_scrapBrowser != null)
-                {
-                    _scrapBrowser.Dispose();
-                    _scrapBrowser = null;
-                }
-            }*/
 
         }
         private bool ScrapHasMorePages(HtmlDocument document)
@@ -182,12 +196,14 @@ namespace AgroAdd.Services.Scrappers
 
         private string SafeExtratImgSrc(HtmlElement simpleElement)
         {
-            var imgEl = simpleElement?.ElementsByClass("img", "corner")?.FirstOrDefault();
+            var imgEl = simpleElement?.ElementsByClass("img", "img-responsive")?.FirstOrDefault();
             if (imgEl == null)
             {
                 var imgElEl = imgEl?.GetAttribute("src");
                 if (imgElEl == null)
                     return null;
+                else if (imgElEl.Contains("lazy"))
+                    return imgEl.GetAttribute("data-src");
                 else
                     return imgElEl = imgEl?.GetAttribute("src");
             }

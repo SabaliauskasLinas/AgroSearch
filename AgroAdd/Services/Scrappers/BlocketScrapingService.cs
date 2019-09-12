@@ -18,9 +18,12 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
-        private bool _scrapDone;
+        private string _synonyms;
+        private string _searchText;
         private decimal _currentRate = 0.09442m;
         private bool _rateLoaded = false;
+        private bool _isFilteringActive;
+        private bool _scrapDone;
 
         public string ServiceName => "Blocket.se";
         public string Country => "SE";
@@ -41,7 +44,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             try
             {
                 if (_scrapBrowser == null)
@@ -80,12 +86,11 @@ namespace AgroAdd.Services.Scrappers
 
             if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
                 return;
-
-            ////while (!_rateLoaded)
-            {
-                ////System.Threading.Thread.Sleep(500);
-            }
             IEnumerable<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -107,6 +112,34 @@ namespace AgroAdd.Services.Scrappers
             {
                 foreach (var add in ads)
                 {
+                    var h1 = add.ElementsByClass("h1", "h5")?.FirstOrDefault();
+                    var title = SafeExtractTitle(h1);
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     var price = add.ElementsByClass("p", "list_price")?.FirstOrDefault()?.InnerText;
                     if (price != null && price.ToLower().Contains("ex. moms"))
                     {
@@ -128,8 +161,6 @@ namespace AgroAdd.Services.Scrappers
                                 continue;
                         }
                     }
-                    var h1 = add.ElementsByClass("h1", "h5")?.FirstOrDefault();
-                    var title = SafeExtractTitle(h1);
                     var divDes = add.ElementsByClass("header", "clearfix")?.FirstOrDefault();
                     var description = divDes.ElementsByClass("div", "pull-left")?.FirstOrDefault()?.InnerText;
                     var src = SafeExtractSrc(add);

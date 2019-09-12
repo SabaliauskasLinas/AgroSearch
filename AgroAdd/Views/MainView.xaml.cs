@@ -99,5 +99,35 @@ namespace AgroAdd.Views
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
+
+        private void OnXClickUpEvent(object sender, MouseButtonEventArgs e)
+        {
+            var context = DataContext as MainViewViewModel;
+            if (context == null)
+                return;
+            if (context.UntoggleAllCommandCanExecute(1))
+                context.UntoggleAllComandExecute(1);
+        }
+
+        private void OnXMouseEnterEvent(object sender, MouseEventArgs e)
+        {
+            XBlock.SetCurrentValue(ForegroundProperty,Brushes.White);
+        }
+
+        private void OnXMouseEnterLeave(object sender, MouseEventArgs e)
+        {
+            XBlock.SetCurrentValue(ForegroundProperty, Brushes.IndianRed);
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var context = DataContext as MainViewViewModel;
+            if (context == null)
+                return;
+            if (context.IsTheCheapestSelected)
+                context.SortAscending();
+            else if (context.IsTheMostExpensiveSelected)
+                context.SortDescending();
+        }
     }
 }

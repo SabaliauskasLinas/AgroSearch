@@ -94,29 +94,31 @@ namespace AgroAdd.Services.Scrappers
                 foreach (var add in ads)
                 {
                     bool continueFlag = false;
+                    bool breakFlag = false;
                     var title = add.ElementsByClass("a", "link").FirstOrDefault()?.InnerText;
                     //Checking if title contains each request text word
-                    if (!title.ToLower().Contains(_searchText.ToLower()) && _isFilteringActive)  
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))  
                     {
-                        foreach(var word in searchTextWords)
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
                         {
-                            if(!title.ToLower().Replace(" ", "").Contains(word))
-                            {
+                            if(!testTitle.Contains(word))
+                            {   
+                                // Checking if title contains filters
+                                if(filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
                                 continueFlag = true;
                                 break;
                             }
-                                
                         }
                     }
-                    // Checking if title contains filters
-                    /*if (continueFlag)     
-                    {
-                        foreach (var filter in filters)
-                        {
-                            if (title.ToLower().Contains(filter))
-                                break;  
-                        }
-                    }*/
                     if (continueFlag) continue;
                     var price = add.ElementsByClass("div", "price")?.FirstOrDefault();
                     var realPrice = price?.ElementsByClass("span", "js-priceToChange")?.FirstOrDefault()?.InnerText;

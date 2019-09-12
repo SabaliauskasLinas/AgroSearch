@@ -42,7 +42,7 @@ namespace AgroAdd.ViewModels
         private int? _costMin = 5000;
         private int? _costMax = null;
         private int _subPageIndex = 1;
-        private int _subPageSize = 15;
+        private int _subPageSize = 30;
         private Visibility _filterRequiredVisibility;
 
         private List<AdvertisementViewModel> _unpagedAdvertisements { get; set; }
@@ -79,6 +79,7 @@ namespace AgroAdd.ViewModels
             ToggleAllAuctionsCommand = new DelegateCommand(ToggleAllAuctionsCommandExecute, ToggleAllAcutionsCommandCanExecute);
             ToggleAllAdsCommand = new DelegateCommand(ToggleAllAdsCommandExecute, ToggleAllAdsCommandCanExecute);
             ToggleAllCompaniesCommand = new DelegateCommand(ToggleAllCompaniesCommandExecute, ToggleAllCompaniesCommandCanExecute);
+            UntoggleAllCommand = new DelegateCommand(UntoggleAllComandExecute, UntoggleAllCommandCanExecute);
             PreviousSubPageCommand = new DelegateCommand(PreviousSubPageCommandExecute, PreviousSubPageCommandCanExecute);
             NextSubPageCommand = new DelegateCommand(NextSubPageCommandExecute, NextSubPageCommandCanExecute);
 
@@ -252,6 +253,7 @@ namespace AgroAdd.ViewModels
         public DelegateCommand ToggleAllAuctionsCommand { get; private set; }
         public DelegateCommand ToggleAllAdsCommand { get; private set; }
         public DelegateCommand ToggleAllCompaniesCommand { get; private set; }
+        public DelegateCommand UntoggleAllCommand { get; private set; }
         public DelegateCommand GoToUrlCommand { get; private set; }
         public DelegateCommand PreviousSubPageCommand { get; private set; }
         public DelegateCommand NextSubPageCommand { get; private set; }
@@ -455,6 +457,19 @@ namespace AgroAdd.ViewModels
 
         }
 
+        public bool UntoggleAllCommandCanExecute(object commandParameter)
+        {
+            return true;
+        }
+        public void UntoggleAllComandExecute(object commandParameter)
+        {
+            UpdateFocus?.Invoke(this);
+            if (_scrappers == null || !_scrappers.Any())
+                return;
+            foreach (var scrapper in _scrappers)
+                scrapper.IsChecked = false;
+        }
+
         public bool PreviousSubPageCommandCanExecute(object commandParameter)
         {
             return true;
@@ -523,6 +538,18 @@ namespace AgroAdd.ViewModels
             if (IsTheMostExpensiveSelected)
                 _unpagedAdvertisements = _unpagedAdvertisements.OrderByDescending(x => x, _comparer).ToList();
 
+            UpdatePage();
+        }
+
+        public void SortAscending()
+        {
+            _unpagedAdvertisements = _unpagedAdvertisements.OrderBy(x => x, _comparer).ToList();
+            UpdatePage();
+        }
+
+        public void SortDescending()
+        {
+            _unpagedAdvertisements = _unpagedAdvertisements.OrderByDescending(x => x, _comparer).ToList();
             UpdatePage();
         }
 

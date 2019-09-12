@@ -18,9 +18,12 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
-        private bool _scrapDone;
         private int _offset;
         private decimal _currentRate = 1.15206m;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
+        private bool _scrapDone;
         private bool _rateLoaded;
 
         public string ServiceName => "Landwirt.com";
@@ -42,7 +45,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             _offset = 0;
             if (page != 1)
                 _offset = _offset + 20 * (page - 1);
@@ -82,12 +88,11 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
                 return;
 
-            //while (!_rateLoaded)
-            {
-                //System.Threading.Thread.Sleep(500);
-            }
-
             IEnumerable<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -114,6 +119,32 @@ namespace AgroAdd.Services.Scrappers
                     if (info == null)
                         continue;
                     var title = info.ElementsByClass("div", "h3")?.FirstOrDefault()?.InnerText;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     var allDescriptionsCount = info.ElementsByClass("div", "gmmlistcatfield").Count();
                     string description = "";
                     while (allDescriptionsCount != 0)
@@ -122,18 +153,17 @@ namespace AgroAdd.Services.Scrappers
                         allDescriptionsCount--;
                     }
                     var price = add?.ElementsByClass("span", "pricetagbig")?.FirstOrDefault()?.InnerText;
-                    if (price == null)
+                       if (price == null)
                         price = "POA";
                     else
                     {
-                        price = price.Replace(",", "").Replace("-", "").Replace(".", "").Replace("GBP","").Replace(" ","");
+                        price = price.Replace(",", "").Replace(".", "").Replace(" ","").Replace("-","").Replace("EUR","");
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
-                            var euroPrice = (int)(Math.Round(decimalPrice * _currentRate));
-                            price = euroPrice.ToString("#,##0") + " €";
-                            if (euroPrice < _lastCostMin)
+                            price = decimalPrice.ToString("#,##0") + " €";
+                            if (_lastCostMin.HasValue && decimalPrice < _lastCostMin)
                                 continue;
-                            if (euroPrice > _lastCostMax)
+                            if (_lastCostMax.HasValue && decimalPrice > _lastCostMax)
                                 continue;
                         }
                     }

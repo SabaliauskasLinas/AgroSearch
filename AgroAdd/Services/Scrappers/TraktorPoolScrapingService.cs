@@ -18,6 +18,9 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
         private bool _scrapDone;
 
         public string ServiceName => "TraktorPool.de";
@@ -37,7 +40,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             if (_scrapBrowser == null)
             {
                 _scrapBrowser = new WebBrowser();
@@ -59,9 +65,13 @@ namespace AgroAdd.Services.Scrappers
 
         private void ScrapBrowserLoadCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
+            if (_scrapDone)
                 return;
             IEnumerable<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -85,6 +95,33 @@ namespace AgroAdd.Services.Scrappers
                 
                 foreach (var add in ads)
                 {
+                    var title = add.ElementsByClass("span", "machine_entry_title")?.FirstOrDefault()?.InnerText;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     var price = add.ElementsByClass("span", "machine_entry_price_price")?.FirstOrDefault()?.InnerText;
                     if (price == null)
                     {
@@ -110,7 +147,6 @@ namespace AgroAdd.Services.Scrappers
                         }
 
                     }
-                    var title = add.ElementsByClass("span", "machine_entry_title")?.FirstOrDefault()?.InnerText;
                     var description = add.ElementsByClass("span", "machine_entry_description")?.FirstOrDefault()?.InnerText;
                     var div = add.ElementsByClass("div", "machine_entry_image")?.FirstOrDefault();
                     var src = SafeExtractSrc(div);

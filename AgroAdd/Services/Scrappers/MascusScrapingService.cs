@@ -18,9 +18,12 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
-        private bool _scrapDone;
         private decimal _currentRate = 0.88245m;
         private bool _rateLoaded = false;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
+        private bool _scrapDone;
 
         public string ServiceName => "Mascus.co.uk";
         public string Country => "UK";
@@ -40,7 +43,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             if (_scrapBrowser == null)
             {
                 _scrapBrowser = new WebBrowser();
@@ -78,12 +84,11 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
                 return;
 
-            //while (!_rateLoaded)
-            {
-                //System.Threading.Thread.Sleep(500);
-            }
-
             IEnumerable<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -110,6 +115,33 @@ namespace AgroAdd.Services.Scrappers
                     var price = add.ElementsByClass("div", "result-price")?.FirstOrDefault()?.InnerText;
                     if (price == null)
                         continue;
+                    var title = add.ElementsByClass("a", "title-font")?.FirstOrDefault()?.InnerText;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     if (!string.IsNullOrWhiteSpace(price))
                     {
                         if (price.ToUpper().Contains("ON REQUEST"))
@@ -129,7 +161,6 @@ namespace AgroAdd.Services.Scrappers
                         }
 
                     }
-                    var title = add.ElementsByClass("a", "title-font")?.FirstOrDefault()?.InnerText;
                     var description = add.ElementsByClass("p", "result-details")?.FirstOrDefault()?.InnerText;
                     var td = add.ElementsByClass("td", "result-image")?.FirstOrDefault();
                     var src = SafeExtractSrc(td);

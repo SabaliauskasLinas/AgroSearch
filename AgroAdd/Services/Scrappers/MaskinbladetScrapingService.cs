@@ -18,9 +18,12 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
-        private bool _scrapDone;
         private decimal _currentRate = 0.13401m;
         private bool _rateLoaded = false;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
+        private bool _scrapDone;
 
         public string ServiceName => "Maskinbladet.dk";
         public string Country => "DK";
@@ -40,7 +43,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             if (_scrapBrowser == null)
             {
                 _scrapBrowser = new WebBrowser();
@@ -78,12 +84,11 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState == WebBrowserReadyState.Loading || _scrapBrowser.ReadyState == WebBrowserReadyState.Loaded || _scrapBrowser.ReadyState == WebBrowserReadyState.Uninitialized)
                 return;
 
-            //while (!_rateLoaded)
-            {
-                //System.Threading.Thread.Sleep(500);
-            }
-
             HtmlElementCollection ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
@@ -114,6 +119,33 @@ namespace AgroAdd.Services.Scrappers
                     var titleDiv = add.ElementsByClass("div", "forhandler-beskrivelse")?.FirstOrDefault();
                     if (titleDiv == null)
                         continue;
+                    var title = titleDiv?.GetElementsByTagName("h2")[0].InnerText;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     var price = add.ElementsByClass("p", "forhandler-pris-align-shift")?.FirstOrDefault()?.InnerText;
                     if (!string.IsNullOrWhiteSpace(price))
                     {
@@ -141,7 +173,6 @@ namespace AgroAdd.Services.Scrappers
                     var moremoreDescription = ElementAtOrDefault(divAd, 1)?.InnerText;
                     var moremoremoreDescription = ElementAtOrDefault(divAd, 2)?.InnerText;
                     description = moreDescription + " " + moremoreDescription + " " + moremoremoreDescription + Environment.NewLine + description;
-                    var title = titleDiv?.GetElementsByTagName("h2")[0].InnerText;
                     var srcDiv = add.ElementsByClass("div", "search-result-image")?.FirstOrDefault();
                     var imgSrc = SafeExtractSrc(srcDiv);
                     if (imgSrc == null || imgSrc == " " || imgSrc == "")

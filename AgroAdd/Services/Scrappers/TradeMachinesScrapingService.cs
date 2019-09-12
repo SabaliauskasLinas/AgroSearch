@@ -18,9 +18,12 @@ namespace AgroAdd.Services.Scrappers
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
-        private bool _scrapDone;
         private decimal _currentRate = 0.88245m;
         private bool _rateLoaded = false;
+        private string _synonyms;
+        private string _searchText;
+        private bool _isFilteringActive;
+        private bool _scrapDone;
 
         public string ServiceName => "Trademachines.fr";
         public string Country => "FR";
@@ -40,7 +43,10 @@ namespace AgroAdd.Services.Scrappers
         {
             _lastCostMin = costmin;
             _lastCostMax = costmax;
+            _synonyms = synonyms;
             _scrapDone = false;
+            _searchText = query;
+            _isFilteringActive = filtering;
             if (_scrapBrowser == null)
             {
                 _scrapBrowser = new WebBrowser();
@@ -78,16 +84,15 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState != WebBrowserReadyState.Complete)
                 return;
 
-            //while (!_rateLoaded)
-            {
-                //System.Threading.Thread.Sleep(500);
-            }
-
             List<HtmlElement> ads = null;
+            string[] filters = null;
+            string[] searchTextWords = _searchText.ToLower().Split(' ');
+            if (!string.IsNullOrEmpty(_synonyms))
+                filters = _synonyms.ToLower().Split(';');
             var results = new List<Advertisement>();
             try
             {
-                ads = _scrapBrowser.Document.ElementsByClass("li", "lotlist-item").ToList();
+                ads = _scrapBrowser.Document.ElementsByClass("li", "box-vt").ToList();
                 if (ads.Any())
                 {
                     ads.RemoveAt(ads.Count - 1);
@@ -108,6 +113,33 @@ namespace AgroAdd.Services.Scrappers
             {
                 foreach (var add in ads)
                 {
+                    var title = add.ElementsByClass("h3", "lotlist-title")?.FirstOrDefault()?.InnerText;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
+                    //Checking if title contains each request text word
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
                     var price = add.ElementsByClass("div", "lotlist-actions-price")?.FirstOrDefault()?.InnerText;
                     if (price == null || price.ToLower() == "prix sur demande")
                         price = "POA";
@@ -125,7 +157,6 @@ namespace AgroAdd.Services.Scrappers
                         }
                     }
                     var div = add.ElementsByClass("div", "lotlist-image")?.FirstOrDefault();
-                    var title = add.ElementsByClass("h3", "lotlist-title")?.FirstOrDefault()?.InnerText;
                     var description = add.ElementsByClass("div", "lotlist-detailcontent")?.FirstOrDefault()?.InnerText;
                     var src = SafeExtractSrc(div);
                     if (src[0] != 'h')
