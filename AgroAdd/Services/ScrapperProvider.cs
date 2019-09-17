@@ -2,6 +2,7 @@
 using AgroAdd.Services.Scrappers;
 using AgroAdd.Services.Scrappers.BvaScrapper;
 using AgroAdd.Services.Scrappers.LebonCoinScrapper;
+using AgroAdd.Services.Scrappers.TradeMachinesScrapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace AgroAdd.Services
                 new MascusScrapingService(loggingService, currencyApy),
                 new MaskinbladetScrapingService(loggingService, currencyApy),
                 new SkelbiuScrapingService(loggingService),
-                //new TradeMachinesScrapingService(loggingService, currencyApy),
+                new Scrappers.TradeMachinesScrapper.TradeMachinesScrapingService(loggingService),
                 new TraktorPoolScrapingService(loggingService),
                 new TrattoriSupermarketScrapingService(loggingService),
                 new LandwirtScrapingService(loggingService,currencyApy),

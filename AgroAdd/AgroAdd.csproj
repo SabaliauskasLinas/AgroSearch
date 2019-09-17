@@ -113,6 +113,17 @@
     <Compile Include="Services\Scrappers\LebonCoinScrapper\Models\SearchParams.cs" />
     <Compile Include="Services\Scrappers\PfeiferMachineryScrapingService.cs" />
     <Compile Include="Services\Scrappers\FarolScrapper\FarolTractorScrapingService.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesContent.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesHits.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesLocation.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesOriginalResponse.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesPageProps.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesProduct.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesProps.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesResults.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesResultsState.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesSearchResponse.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\TradeMachinesScrapingService.cs" />
     <Compile Include="Services\Scrappers\TrucksScrapingService.cs" />
     <Compile Include="Services\Scrappers\ClassBordesholmScrapingService.cs" />
     <Compile Include="Services\Scrappers\LebonCoinScrapingService.cs" />

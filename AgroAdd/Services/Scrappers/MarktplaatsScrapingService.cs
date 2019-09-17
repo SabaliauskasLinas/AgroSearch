@@ -21,7 +21,6 @@ namespace AgroAdd.Services.Scrappers
         private string _searchText;
         private bool _isFilteringActive;
         private bool _scrapDone;
-        private bool _rateLoaded;
 
         public string ServiceName => "Marktplaats.nl";
         public string Country => "NL";
