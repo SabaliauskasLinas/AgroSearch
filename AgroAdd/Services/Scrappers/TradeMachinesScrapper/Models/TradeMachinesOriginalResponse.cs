@@ -1,7 +1,9 @@
-﻿namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper.Models
+﻿using System.Collections.Generic;
+
+namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper.Models
 {
     public class TradeMachinesOriginalResponse
     {
-        public TradeMachinesResults results { get; set; }
+        public List<TradeMachinesResults> results { get; set; }
     }
 }

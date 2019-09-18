@@ -84,7 +84,7 @@ namespace AgroAdd.Services.Scrappers
             if (_scrapDone || _scrapBrowser.ReadyState == WebBrowserReadyState.Loading || _scrapBrowser.ReadyState == WebBrowserReadyState.Loaded || _scrapBrowser.ReadyState == WebBrowserReadyState.Uninitialized)
                 return;
 
-            HtmlElementCollection ads = null;
+            IEnumerable<HtmlElement> ads = null;
             string[] filters = null;
             string[] searchTextWords = _searchText.ToLower().Split(' ');
             if (!string.IsNullOrEmpty(_synonyms))
@@ -92,14 +92,8 @@ namespace AgroAdd.Services.Scrappers
             var results = new List<Advertisement>();
             try
             {
-                var div = _scrapBrowser.Document.ElementsByClass("div", "machine-search").FirstOrDefault();
-                if (div == null)
-                {
-                    AsyncScrapCompleted?.Invoke(this, results, false, null);
-                    return;
-                }
-                ads = div.GetElementsByTagName("a");
-                if (ads.Count == 0)
+                ads = _scrapBrowser.Document.ElementsByClass("li", "mb-10");
+                if (!ads.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
                     return;
@@ -116,12 +110,11 @@ namespace AgroAdd.Services.Scrappers
                
                 foreach (HtmlElement add in ads)
                 {
-                    var titleDiv = add.ElementsByClass("div", "forhandler-beskrivelse")?.FirstOrDefault();
-                    if (titleDiv == null)
-                        continue;
-                    var title = titleDiv?.GetElementsByTagName("h2")[0].InnerText;
+                    var title = add.ElementsByClass("h3", "text-18px")?.FirstOrDefault()?.InnerText;
                     bool continueFlag = false;
                     bool breakFlag = false;
+                    if (title == null)
+                        continue;
                     //Checking if title contains each request text word
                     if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
                     {
@@ -146,14 +139,14 @@ namespace AgroAdd.Services.Scrappers
                         }
                     }
                     if (continueFlag) continue;
-                    var price = add.ElementsByClass("p", "forhandler-pris-align-shift")?.FirstOrDefault()?.InnerText;
+                    var price = add.ElementsByClass("p", "price")?.FirstOrDefault()?.InnerText;
                     if (!string.IsNullOrWhiteSpace(price))
                     {
                         if (price.ToLower().Contains("ring for pris"))
                             price = "POA";
                         else
                         {
-                            price = price.Replace("Pris: ","").Replace("-","").Replace(".", "").Replace(",", "").Replace("€", "");
+                            price = price.Replace("Pris:","").Replace("DKK","").Replace("-","").Replace(".", "").Replace(",", "").Replace("€", "");
                             if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                             {
                                 var euroPrice = (int)(Math.Round(decimalPrice * _currentRate));
@@ -166,14 +159,14 @@ namespace AgroAdd.Services.Scrappers
                         }
 
                     }
-                    var href = add.GetAttribute("href");
-                    var description = titleDiv.ElementsByClass("p", "description")?.FirstOrDefault()?.InnerText+ Environment.NewLine + titleDiv.ElementsByClass("p", "location-info")?.FirstOrDefault()?.InnerText;
-                    var divAd = add.ElementsByClass("div", "hidden-xs");
-                    var moreDescription = ElementAtOrDefault(divAd, 0)?.InnerText;
-                    var moremoreDescription = ElementAtOrDefault(divAd, 1)?.InnerText;
-                    var moremoremoreDescription = ElementAtOrDefault(divAd, 2)?.InnerText;
-                    description = moreDescription + " " + moremoreDescription + " " + moremoremoreDescription + Environment.NewLine + description;
-                    var srcDiv = add.ElementsByClass("div", "search-result-image")?.FirstOrDefault();
+                    var href = SafeExtractHref(add);
+                    var description = add.ElementsByClass("p", "description")?.FirstOrDefault()?.InnerText+ Environment.NewLine + add.ElementsByClass("p", "location-info")?.FirstOrDefault()?.InnerText;
+                    var moreDescription = add.ElementsByClass("li", "year")?.FirstOrDefault()?.InnerText;
+                    var moremoreDescription = add.ElementsByClass("li", "hours")?.FirstOrDefault()?.InnerText;
+                    var moremoremoreDescription = add.ElementsByClass("li", "hp")?.FirstOrDefault()?.InnerText;
+
+                    description ="Year: " + moreDescription + " Hours: " + moremoreDescription + " HP: " + moremoremoreDescription + Environment.NewLine + description;
+                    var srcDiv = add.ElementsByClass("figure", "image")?.FirstOrDefault();
                     var imgSrc = SafeExtractSrc(srcDiv);
                     if (imgSrc == null || imgSrc == " " || imgSrc == "")
                         imgSrc = "Images/noimage.png";
@@ -232,6 +225,15 @@ namespace AgroAdd.Services.Scrappers
                 }
             }
             return false;
+        }
+        private string SafeExtractHref(HtmlElement simpleAdd)
+        {
+            var el = simpleAdd?.GetElementsByTagName("a");
+            if (el == null)
+                return null;
+            if (el.Count == 0)
+                return null;
+            return el[0].GetAttribute("href");
         }
 
         private string SafeExtractSrc(HtmlElement simpleAdd)

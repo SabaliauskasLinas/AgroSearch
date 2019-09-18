@@ -8,22 +8,20 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Windows.Threading;
 using AgroAdd.Services.Scrappers.TradeMachines.Models;
+using System.Net;
+using System.Globalization;
 
 namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
 {
     public class TradeMachinesScrapingService : IScrapingService
     {
         private readonly LoggingService _loggingService;
-        private readonly CurrencyApi _currencyApi;
         private WebBrowser _scrapBrowser;
         private int? _lastCostMin;
         private int? _lastCostMax;
-        private decimal _currentRate = 0.88245m;
-        private bool _rateLoaded = false;
         private string _synonyms;
         private string _searchText;
         private bool _isFilteringActive;
-        private bool _scrapDone;
 
         public string ServiceName => "Trademachines.fr";
         public string Country => "FR";
@@ -43,7 +41,6 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
             _lastCostMin = costmin;
             _lastCostMax = costmax;
             _synonyms = synonyms;
-            _scrapDone = false;
             _searchText = query;
             _isFilteringActive = filtering;
             if (_scrapBrowser == null)
@@ -58,19 +55,6 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
                     _scrapBrowser.Navigate($"https://trademachines.fr/search?phrase={query}");
                 else
                     _scrapBrowser.Navigate($"https://trademachines.fr/search?phrase={query}&page={page}");
-
-                if (!_rateLoaded)
-                {
-                    _currencyApi.GetRateAsync(CurrencyTypes.UnitedStatesDollar)
-                        .ContinueWith((rateTask) =>
-                        {
-                            _rateLoaded = true;
-                            if (rateTask.IsFaulted || rateTask.IsCanceled)
-                                return;
-                            if (rateTask.Result > 0)
-                                _currentRate = rateTask.Result;
-                        });
-                }
             }
             catch (Exception ex)
             {
@@ -82,38 +66,109 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
         {
             try
             {
+                string[] filters = null;
+                string[] searchTextWords = _searchText.ToLower().Split(' ');
                 string apiResponse = _scrapBrowser.Document.Body.InnerHtml;
                 var start = apiResponse.IndexOf("{");
                 var end = apiResponse.LastIndexOf("}");
                 apiResponse = apiResponse.Substring(start, end-start+1).Trim();
+                if (!string.IsNullOrEmpty(_synonyms))
+                    filters = _synonyms.ToLower().Split(';');
 
                 var results = new List<Advertisement>();
                 var parsedResponse = JsonConvert.DeserializeObject<TradeMachinesSearchResponse>(apiResponse);
 
-                if (parsedResponse == null || !parsedResponse.props.pageProps.resultsState._originalResponse.results.hits.Any())
+                if (parsedResponse == null || !parsedResponse.props.pageProps.resultsState._originalResponse.results[0].hits.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
                 }
 
-                foreach (var add in parsedResponse.props.pageProps.resultsState._originalResponse.results.hits)
+                foreach (var add in parsedResponse.props.pageProps.resultsState._originalResponse.results[0].hits)
                 {
                     string img;
+                    string price;
+                    string title;
+                    bool continueFlag = false;
+                    bool breakFlag = false;
                     if (add.product.isSparePart == true) continue;
                     if (add.hasImg)
-                        img = "dizv3061bgivy.cloudfront.net/images" + add.imgId;
+                        img = "https://dizv3061bgivy.cloudfront.net" + add.imgId;
                     else
                         img = "Images/noimage.png";
+
+                    if(add.fr.title != null && add.product.name != null)
+                    {
+                        if (add.fr.title.Length >= add.product.name.Length)
+                            title = add.fr.title;
+                        else
+                            title = add.product.name;
+                    } 
+                    else
+                    {
+                        if (add.fr.title == null)
+                            title = add.product.name;
+                        else
+                            title = add.fr.title;
+                    }
+
+                    if (_isFilteringActive && !title.ToLower().Contains(_searchText.ToLower()))
+                    {
+                        string testTitle = title.ToLower().Replace(" ", "");
+                        foreach (var word in searchTextWords)
+                        {
+                            if (!testTitle.Contains(word))
+                            {
+                                // Checking if title contains filters
+                                if (filters != null && filters.Length != 0)
+                                {
+                                    foreach (var filter in filters)
+                                    {
+                                        if (testTitle.Contains(filter) && !filter.Equals(""))
+                                            breakFlag = true;
+                                    }
+                                }
+                                if (breakFlag) break;
+                                continueFlag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (continueFlag) continue;
+
+                    if (!add.hasPrice)
+                        price = "POA";
+                    else
+                    {
+                        price = add.price.ToString();
+                        if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
+                        {
+                            price = decimalPrice.ToString("#,##0") + " €";
+                            if (_lastCostMin.HasValue && decimalPrice < _lastCostMin)
+                                continue;
+                            if (_lastCostMax.HasValue && decimalPrice > _lastCostMax)
+                                continue;
+                        }
+                    }
+
                     results.Add(new Advertisement
                     {
-                        Name = add.product.name,
-                        Description = "Year: " + add.year + 
-                        Environment.NewLine + add.location.country + " " + add.location.state + " " + add.location.city,
-                        Price = add.price.ToString(),
+                        Name = title,
+                        Description = "Year: " + add?.year +
+                        Environment.NewLine + add.location?.country + " " + add.location?.state + " " + add.location?.city +
+                        Environment.NewLine + add.seller?.name,
+                        Price = price,
                         ImageUrl = img,
-                        PageUrl = "https://trademachines.fr/lots/" + add.objectID,
-                    }) ;
+                        PageUrl = "https://trademachines.fr/lots/" + add?.objectID,
+                    });
                 }
-                    AsyncScrapCompleted?.Invoke(this, results, false, null);
+                var parsedResponseContent = parsedResponse.props.pageProps.resultsState.content;
+                bool hasNextPage;
+                if (parsedResponseContent.nbPages > parsedResponseContent.page + 1)
+                    hasNextPage = true;
+                else
+                    hasNextPage = false;
+
+                AsyncScrapCompleted?.Invoke(this, results, hasNextPage, null);
             }
             catch (Exception ex)
             {

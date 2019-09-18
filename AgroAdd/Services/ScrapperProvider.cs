@@ -30,7 +30,7 @@ namespace AgroAdd.Services
                 new MascusScrapingService(loggingService, currencyApy),
                 new MaskinbladetScrapingService(loggingService, currencyApy),
                 new SkelbiuScrapingService(loggingService),
-                new Scrappers.TradeMachinesScrapper.TradeMachinesScrapingService(loggingService),
+                new TradeMachinesScrapingService(loggingService),
                 new TraktorPoolScrapingService(loggingService),
                 new TrattoriSupermarketScrapingService(loggingService),
                 new LandwirtScrapingService(loggingService,currencyApy),
