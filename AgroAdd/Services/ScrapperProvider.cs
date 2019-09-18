@@ -2,6 +2,7 @@
 using AgroAdd.Services.Scrappers;
 using AgroAdd.Services.Scrappers.BvaScrapper;
 using AgroAdd.Services.Scrappers.LebonCoinScrapper;
+using AgroAdd.Services.Scrappers.MarktplaatsScrapper;
 using AgroAdd.Services.Scrappers.TradeMachinesScrapper;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace AgroAdd.Services
                 new BaywaboerseScrapingService(loggingService),
                 new BlocketScrapingService(loggingService, currencyApy),
                 new EuropeagrocultureScrapingService(loggingService),
-                //new MarktplaatsScrapingService(loggingService),
+                new MarktplaatsScrapingService(loggingService),
                 new MascusScrapingService(loggingService, currencyApy),
                 new MaskinbladetScrapingService(loggingService, currencyApy),
                 new SkelbiuScrapingService(loggingService),

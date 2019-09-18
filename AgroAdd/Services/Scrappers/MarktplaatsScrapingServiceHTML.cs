@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace AgroAdd.Services.Scrappers
 {
-    public class MarktplaatsScrapingService : IScrapingService
+    public class MarktplaatsScrapingServiceHTML : IScrapingService
     {
         private readonly LoggingService _loggingService;
         private WebBrowser _scrapBrowser;
@@ -28,7 +28,7 @@ namespace AgroAdd.Services.Scrappers
         public bool IsCompany => false;
         public bool RequiresText => true;
 
-        public MarktplaatsScrapingService(LoggingService loggingService)
+        public MarktplaatsScrapingServiceHTML(LoggingService loggingService)
         {
             _loggingService = loggingService;
         }

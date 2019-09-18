@@ -111,6 +111,14 @@
     <Compile Include="Services\Scrappers\LebonCoinScrapper\Models\SearchFilter.cs" />
     <Compile Include="Services\Scrappers\LebonCoinScrapper\Models\SearchKeyWord.cs" />
     <Compile Include="Services\Scrappers\LebonCoinScrapper\Models\SearchParams.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\MarktplaatsScrapingService.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsListings.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsLocation.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsPageProps.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsPriceInfo.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsProps.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsSearchResponse.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsSellerInformation.cs" />
     <Compile Include="Services\Scrappers\PfeiferMachineryScrapingService.cs" />
     <Compile Include="Services\Scrappers\FarolScrapper\FarolTractorScrapingService.cs" />
     <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesContent.cs" />
@@ -129,7 +137,7 @@
     <Compile Include="Services\Scrappers\TrucksScrapingService.cs" />
     <Compile Include="Services\Scrappers\ClassBordesholmScrapingService.cs" />
     <Compile Include="Services\Scrappers\LebonCoinScrapingService.cs" />
-    <Compile Include="Services\Scrappers\MarktplaatsScrapingService.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapingServiceHTML.cs" />
     <Compile Include="Services\Scrappers\TrattoriSupermarketScrapingService.cs" />
     <Compile Include="Services\Scrappers\EuropeagrocultureScrapingService.cs" />
     <Compile Include="Services\Scrappers\EpicauctionsScrapingService.cs" />
