@@ -117,6 +117,7 @@
     <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsPageProps.cs" />
     <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsPriceInfo.cs" />
     <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsProps.cs" />
+    <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsSearchRequestAndResponse.cs" />
     <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsSearchResponse.cs" />
     <Compile Include="Services\Scrappers\MarktplaatsScrapper\Models\MarktplaatsSellerInformation.cs" />
     <Compile Include="Services\Scrappers\PfeiferMachineryScrapingService.cs" />

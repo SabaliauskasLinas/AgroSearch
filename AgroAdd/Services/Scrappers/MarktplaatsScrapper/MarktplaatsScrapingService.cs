@@ -79,19 +79,19 @@ namespace AgroAdd.Services.Scrappers.MarktplaatsScrapper
                 var results = new List<Advertisement>();
                 var parsedResponse = JsonConvert.DeserializeObject<MarktplaatsSearchResponse>(apiResponse);
 
-                if (parsedResponse == null || !parsedResponse.props.pageProps.listings.Any())
+                if (parsedResponse == null || !parsedResponse.props.pageProps.searchRequestAndResponse.listings.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
                 }
 
-                foreach (var add in parsedResponse.props.pageProps.listings)
+                foreach (var add in parsedResponse.props.pageProps.searchRequestAndResponse.listings)
                 {
                     string img;
                     string price;
                     string title;
                     bool continueFlag = false;
                     bool breakFlag = false;
-                    if (add.imageUrls.Any())
+                    if (add.imageUrls != null && add.imageUrls.Any())
                         img = "https:" + add.imageUrls[0];
                     else
                         img = "Images/noimage.png";
@@ -147,7 +147,7 @@ namespace AgroAdd.Services.Scrappers.MarktplaatsScrapper
                     });
                 }
                 bool hasNextPage;
-                decimal resultCount = parsedResponse.props.pageProps.totalResultCount;
+                decimal resultCount = parsedResponse.props.pageProps.searchRequestAndResponse.totalResultCount;
                 decimal totalPages = Math.Ceiling(resultCount / 30);
 
                 if (parsedResponse.props.pageProps.page + 1 < totalPages)
