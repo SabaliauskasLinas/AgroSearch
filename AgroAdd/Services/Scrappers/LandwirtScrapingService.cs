@@ -98,7 +98,7 @@ namespace AgroAdd.Services.Scrappers
             {
                 var adsParent = _scrapBrowser.Document.GetElementById("treffertabelle");
                 ads = adsParent?.ElementsByClass("div","gmmtreffer");
-                if (!ads.Any())
+                if (ads == null || !ads.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
                     return;
@@ -160,7 +160,7 @@ namespace AgroAdd.Services.Scrappers
                         price = price.Replace(",", "").Replace(".", "").Replace(" ","").Replace("-","").Replace("EUR","");
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
-                            price = decimalPrice.ToString("#,##0") + " €";
+                            price = decimalPrice.ToString("### ###") + " €";
                             if (_lastCostMin.HasValue && decimalPrice < _lastCostMin)
                                 continue;
                             if (_lastCostMax.HasValue && decimalPrice > _lastCostMax)

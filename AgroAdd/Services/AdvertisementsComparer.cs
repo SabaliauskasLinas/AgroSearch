@@ -13,17 +13,17 @@ namespace AgroAdd.Services
 
         public int Compare(AdvertisementViewModel modelA, AdvertisementViewModel modelB)
         {
-            modelA.Price = modelA.Price.Replace(",", "").Replace(".", "").Replace("€", "");
+            modelA.Price = modelA.Price.Replace(",", "").Replace(".", "").Replace("€", "").Replace(" ","");
             if (!decimal.TryParse(modelA.Price, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal priceA))
                 priceA = decimal.MaxValue;
-            modelB.Price = modelB.Price.Replace(",", "").Replace(".", "").Replace("€", "");
+            modelB.Price = modelB.Price.Replace(",", "").Replace(".", "").Replace("€", "").Replace(" ", "");
             if (!decimal.TryParse(modelB.Price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal priceB))
                 priceB = decimal.MaxValue;
             
             if (priceA!=decimal.MaxValue)
-                modelA.Price = priceA.ToString("#,##0") + " €";
+                modelA.Price = priceA.ToString("### ###") + " €";
             if (priceB!=decimal.MaxValue)
-                modelB.Price = priceB.ToString("#,##0") + " €";
+                modelB.Price = priceB.ToString("### ###") + " €";
 
             if (priceA < priceB)
                 return -1;

@@ -141,7 +141,7 @@ namespace AgroAdd.Services.Scrappers
                             if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                             {
                                 decimalPrice /= 100;
-                                price = decimalPrice.ToString("#,##0") + " €";
+                                price = decimalPrice.ToString("### ###") + " €";
                                 if (decimalPrice <  _lastCostMin)
                                     continue;
                                 if (decimalPrice >  _lastCostMax)

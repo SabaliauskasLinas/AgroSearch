@@ -91,7 +91,7 @@ namespace AgroAdd.Services.Scrappers
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
                             var euroPrice = (int)(Math.Round(decimalPrice * _currentRate));
-                            price = euroPrice.ToString("#,##0") + " €";
+                            price = euroPrice.ToString("### ###") + " €";
                         }
                     }
                     var styles = SafeExtractStyles(add);

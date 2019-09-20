@@ -142,7 +142,7 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
                         price = add.price.ToString();
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
-                            price = decimalPrice.ToString("#,##0") + " €";
+                            price = decimalPrice.ToString("### ###") + " €";
                             if (_lastCostMin.HasValue && decimalPrice < _lastCostMin)
                                 continue;
                             if (_lastCostMax.HasValue && decimalPrice > _lastCostMax)

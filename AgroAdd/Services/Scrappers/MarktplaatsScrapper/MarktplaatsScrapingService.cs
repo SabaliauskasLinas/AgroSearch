@@ -128,7 +128,7 @@ namespace AgroAdd.Services.Scrappers.MarktplaatsScrapper
                         price = (add.priceInfo.priceCents / 100).ToString();
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
-                            price = decimalPrice.ToString("#,##0") + " €";
+                            price = decimalPrice.ToString("### ###") + " €";
                             if (_lastCostMin.HasValue && decimalPrice < _lastCostMin)
                                 continue;
                             if (_lastCostMax.HasValue && decimalPrice > _lastCostMax)

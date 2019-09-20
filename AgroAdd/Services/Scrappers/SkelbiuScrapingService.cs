@@ -124,14 +124,14 @@ namespace AgroAdd.Services.Scrappers
                     }
                     if (continueFlag) continue;
                     var price = add.ElementsByClass("div", "adsPrice")?.FirstOrDefault()?.InnerText;
-                    if (price == null)
+                    if (price == null || price == " ")
                         price = "POA";
                     else
                     {
                         price = price.Replace(" ", "").Replace(",", "").Replace("€", "");
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
-                            price = decimalPrice.ToString("#,##0") + " €";
+                            price = decimalPrice.ToString("### ###") + " €";
                             if (decimalPrice <  _lastCostMin)
                                 continue;
                             if (decimalPrice >  _lastCostMax)
