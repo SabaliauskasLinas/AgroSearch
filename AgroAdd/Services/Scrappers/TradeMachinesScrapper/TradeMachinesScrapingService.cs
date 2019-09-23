@@ -69,6 +69,8 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
                 string[] filters = null;
                 string[] searchTextWords = _searchText.ToLower().Split(' ');
                 string apiResponse = _scrapBrowser.Document.Body.InnerHtml;
+                if (apiResponse.IndexOf("json\">{") != -1)
+                    apiResponse = apiResponse.Substring(apiResponse.IndexOf("json\">{"));
                 var start = apiResponse.IndexOf("{");
                 var end = apiResponse.LastIndexOf("}");
                 apiResponse = apiResponse.Substring(start, end-start+1).Trim();

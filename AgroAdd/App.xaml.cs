@@ -18,7 +18,7 @@ namespace AgroAdd
             {
                 var loggingService = new LoggingService();
                 var currencyApi = new CurrencyApi(loggingService);
-                var scrapperProvider = new ScrapperProvider(loggingService, currencyApi); // cia ilgai
+                var scrapperProvider = new ScrapperProvider(loggingService, currencyApi);
                 MainWindow = new MainView(loggingService, scrapperProvider);
                 MainWindow.Closed += MainWindowClosed;
                 MainWindow.Show();
@@ -33,7 +33,7 @@ namespace AgroAdd
 
         private void MainWindowClosed(object sender, EventArgs e)
         {
-            //this.Shutdown();
+            this.Shutdown();
         }
     }
 }
