@@ -128,6 +128,7 @@ namespace AgroAdd.Views
                 context.SortAscending();
             else if (context.IsTheMostExpensiveSelected)
                 context.SortDescending();
+            AdsList.Focus();
         }
     }
 }

@@ -84,8 +84,8 @@
     <Compile Include="Extensions\HtmlDocumentExtensions.cs" />
     <Compile Include="Interfaces\IScrapingService.cs" />
     <Compile Include="Models\Advertisement.cs" />
-    <Compile Include="Models\MVVM\BaseViewModel.cs" />
-    <Compile Include="Models\MVVM\DelegateCommand.cs" />
+    <Compile Include="ViewModels\MVVM\BaseViewModel.cs" />
+    <Compile Include="ViewModels\MVVM\DelegateCommand.cs" />
     <Compile Include="Services\AdvertisementsComparer.cs" />
     <Compile Include="Services\CurrencyApi.cs" />
     <Compile Include="Services\CurrencyType.cs" />

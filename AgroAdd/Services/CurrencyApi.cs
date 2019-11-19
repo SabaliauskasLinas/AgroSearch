@@ -24,10 +24,8 @@ namespace AgroAdd.Services
             try
             {
                 var result = _httpClient.GetStringAsync($"https://free.currencyconverterapi.com/api/v6/convert?q={currencyCode}_EUR&compact=y&apiKey=2f2ee51709f4b5ad1074").Result;
-                // var content = result.Content.ReadAsStringAsync().Result;
                 var jObject = JObject.Parse(result);
                 return jObject.GetValue($"{currencyCode}_EUR").Value<decimal>("val");
-                // return 0m;
             }
             catch(Exception ex)
             {

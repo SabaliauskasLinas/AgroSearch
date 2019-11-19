@@ -23,7 +23,6 @@ namespace AgroAdd.Models.Mvvm
         {
             _executeAction = executeAction;
             _canExecute = (parameter) => true;
-
         }
 
         /// <summary>
