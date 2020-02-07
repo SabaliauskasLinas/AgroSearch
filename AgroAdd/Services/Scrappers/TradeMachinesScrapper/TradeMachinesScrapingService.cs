@@ -28,6 +28,7 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
         public bool IsAuction => false;
         public bool IsCompany => false;
         public bool RequiresText => true;
+        public int RequestCounter = 0;
 
         public TradeMachinesScrapingService(LoggingService loggingService)
         {
@@ -43,6 +44,7 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
             _synonyms = synonyms;
             _searchText = query;
             _isFilteringActive = filtering;
+            RequestCounter = 0;
             if (_scrapBrowser == null)
             {
                 _scrapBrowser = new WebBrowser();
@@ -72,20 +74,21 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
                 if (apiResponse.IndexOf("json\">{") != -1)
                     apiResponse = apiResponse.Substring(apiResponse.IndexOf("json\">{"));
                 var start = apiResponse.IndexOf("{");
-                var end = apiResponse.LastIndexOf("}");
+                var end = apiResponse.LastIndexOf("}</script><script");
                 apiResponse = apiResponse.Substring(start, end-start+1).Trim();
                 if (!string.IsNullOrEmpty(_synonyms))
                     filters = _synonyms.ToLower().Split(';');
 
                 var results = new List<Advertisement>();
                 var parsedResponse = JsonConvert.DeserializeObject<TradeMachinesSearchResponse>(apiResponse);
-
-                if (parsedResponse == null || !parsedResponse.props.pageProps.resultsState._originalResponse.results[0].hits.Any())
+                RequestCounter++;
+                if (RequestCounter > 1) return;
+                if (parsedResponse == null || !parsedResponse.props.pageProps.resultsState.rawResults[0].hits.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
+                    return;
                 }
-
-                foreach (var add in parsedResponse.props.pageProps.resultsState._originalResponse.results[0].hits)
+                foreach (var add in parsedResponse.props.pageProps.resultsState.rawResults[0].hits)
                 {
                     string img;
                     string price;
@@ -141,7 +144,7 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
                         price = "POA";
                     else
                     {
-                        price = add.price.ToString();
+                        price = Math.Round(add.price).ToString();
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
                             price = decimalPrice.ToString("### ###") + " €";
@@ -163,9 +166,9 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper
                         PageUrl = "https://trademachines.fr/lots/" + add?.objectID,
                     });
                 }
-                var parsedResponseContent = parsedResponse.props.pageProps.resultsState.content;
+                var parsedResponseRawResult = parsedResponse.props.pageProps.resultsState.rawResults[0];
                 bool hasNextPage;
-                if (parsedResponseContent.nbPages > parsedResponseContent.page + 1)
+                if (parsedResponseRawResult.nbPages > parsedResponseRawResult.page + 1)
                     hasNextPage = true;
                 else
                     hasNextPage = false;

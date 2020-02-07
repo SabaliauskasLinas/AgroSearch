@@ -8,7 +8,6 @@ namespace AgroAdd.Services.Scrappers.TradeMachinesScrapper.Models
 {
     public class TradeMachinesResultsState
     {
-        public TradeMachinesContent content { get; set;}
-        public TradeMachinesOriginalResponse _originalResponse { get; set; }
+        public List<TradeMachinesRawResults> rawResults { get; set; }
     }
 }

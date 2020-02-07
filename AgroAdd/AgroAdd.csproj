@@ -84,6 +84,8 @@
     <Compile Include="Extensions\HtmlDocumentExtensions.cs" />
     <Compile Include="Interfaces\IScrapingService.cs" />
     <Compile Include="Models\Advertisement.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesRawResults.cs" />
+    <Compile Include="Services\Scrappers\TradeMachinesScrapper\Models\TradeMachinesState.cs" />
     <Compile Include="ViewModels\MVVM\BaseViewModel.cs" />
     <Compile Include="ViewModels\MVVM\DelegateCommand.cs" />
     <Compile Include="Services\AdvertisementsComparer.cs" />
