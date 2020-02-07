@@ -57,9 +57,9 @@ namespace AgroAdd.Services.Scrappers
                     _scrapBrowser.ScriptErrorsSuppressed = true;
                 }
                 if (page < 2)
-                    _scrapBrowser.Navigate($"https://www.blocket.se/stockholm/skogs-_lantbruksmaskiner?q={query}&w=3&st=s&ca=11&is=1&l=0&md=th&cg=1240&st=s");
+                    _scrapBrowser.Navigate($"https://www.blocket.se/annonser/hela_sverige/fordon/skogs_lantbruksmaskiner?cg=1240&q={query}");
                 else
-                    _scrapBrowser.Navigate($"https://www.blocket.se/hela_sverige?q={query}&cg=1240&w=3&st=s&ps=&pe=&c=&ca=11&l=0&md=th&o={page}");
+                    _scrapBrowser.Navigate($"https://www.blocket.se/annonser/hela_sverige/fordon/skogs_lantbruksmaskiner?cg=1240&page={page}&q={query}");
 
                 if (!_rateLoaded)
                 {
@@ -94,7 +94,7 @@ namespace AgroAdd.Services.Scrappers
             var results = new List<Advertisement>();
             try
             {
-                ads = _scrapBrowser.Document.ElementsByClass("article", "item_row");
+                ads = _scrapBrowser.Document.ElementsByClass("div", "styled__Wrapper-sc-1kpvi4z-0");
                 if (!ads.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
@@ -112,8 +112,7 @@ namespace AgroAdd.Services.Scrappers
             {
                 foreach (var add in ads)
                 {
-                    var h1 = add.ElementsByClass("h1", "h5")?.FirstOrDefault();
-                    var title = SafeExtractTitle(h1);
+                    var title = add.ElementsByClass("div", "styled__SubjectWrapper-sc-1kpvi4z-12")?.FirstOrDefault().InnerText;
                     bool continueFlag = false;
                     bool breakFlag = false;
                     //Checking if title contains each request text word
@@ -140,13 +139,13 @@ namespace AgroAdd.Services.Scrappers
                         }
                     }
                     if (continueFlag) continue;
-                    var price = add.ElementsByClass("p", "list_price")?.FirstOrDefault()?.InnerText;
+                    var price = add.ElementsByClass("div", "styled__SalesInfo-sc-1kpvi4z-22")?.FirstOrDefault()?.InnerText;
                     if (price != null && price.ToLower().Contains("ex. moms"))
                     {
                         price = price.Remove(price.IndexOf("("));
                     }
 
-                    if (price == null)
+                    if (price == null || !Regex.IsMatch(price, @"^[0-9]"))
                         price = "POA";
                     else
                     {
@@ -161,9 +160,8 @@ namespace AgroAdd.Services.Scrappers
                                 continue;
                         }
                     }
-                    var divDes = add.ElementsByClass("header", "clearfix")?.FirstOrDefault();
-                    var description = divDes.ElementsByClass("div", "pull-left")?.FirstOrDefault()?.InnerText;
-                    var src = SafeExtractSrc(add);
+                    var description = _scrapBrowser.Document.ElementsByClass("div", "styled__ParamsWrapper-sc-1kpvi4z-15")?.FirstOrDefault()?.InnerText;
+                    var src = SafeExtractSrc(add.ElementsByClass("div", "ListImage__Wrapper-sc-1rp77jc-0").FirstOrDefault());
                     if (src == null || src == " " || src == "")
                         src = "Images/noimage.png";
 
@@ -240,15 +238,6 @@ namespace AgroAdd.Services.Scrappers
             if (el.Count == 0)
                 return null;
             return el[0].GetAttribute("src");
-        }
-        private string SafeExtractTitle(HtmlElement simpleAdd)
-        {
-            var el = simpleAdd?.GetElementsByTagName("a");
-            if (el == null)
-                return null;
-            if (el.Count == 0)
-                return null;
-            return el[0].GetAttribute("title");
         }
 
     }
