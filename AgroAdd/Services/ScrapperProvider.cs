@@ -26,7 +26,7 @@ namespace AgroAdd.Services
                 new AtcTraderScrapingService(loggingService),
                 new BaywaboerseScrapingService(loggingService),
                 new BlocketScrapingService(loggingService, currencyApy),
-                new EuropeagrocultureScrapingService(loggingService),
+                //new EuropeagrocultureScrapingService(loggingService),
                 new MarktplaatsScrapingService(loggingService),
                 new MascusScrapingService(loggingService, currencyApy),
                 new MaskinbladetScrapingService(loggingService, currencyApy),

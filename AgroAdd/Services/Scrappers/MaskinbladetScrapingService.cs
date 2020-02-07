@@ -92,7 +92,7 @@ namespace AgroAdd.Services.Scrappers
             var results = new List<Advertisement>();
             try
             {
-                ads = _scrapBrowser.Document.ElementsByClass("li", "mb-10");
+                ads = _scrapBrowser.Document.ElementsByClass("li", "mb-20");
                 if (!ads.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
