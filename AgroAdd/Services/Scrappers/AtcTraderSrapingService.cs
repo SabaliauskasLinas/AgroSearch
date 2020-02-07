@@ -53,9 +53,9 @@ namespace AgroAdd.Services.Scrappers
                     _scrapBrowser.ScriptErrorsSuppressed = true;
                 }
                 if (page < 2)
-                    _scrapBrowser.Navigate($"https://www.atc-trader.com/gebraucht?searchtype=filter&dealerid=&associationid=&interval=&only_topad=&phrase={query}&category=&manufacturer=&model_id=&radius_zipcode=&%20radius_distance_km=&country=&price_from=&price_to=&power_from=&power_to=&year_from=&year_to=&hours_from=&hours_to=&certified_ad_of=");
+                    _scrapBrowser.Navigate($"https://www.atc-trader.com/suchergebnis.php?typ={query}&ft_search=1&rewriting=none&lang2=en&dealer=atctrader&orderby=preis&aufabsteigend=desc&ft_search=1&offset=0");
                 else
-                    _scrapBrowser.Navigate($"https://www.atc-trader.com/gebraucht/list/{page}?searchtype=filter&dealerid=&associationid=&interval=&only_topad=&phrase={query}&category=&manufacturer=&model_id=&radius_zipcode=&radius_distance_km=&country=&price_from=&price_to=&power_from=&power_to=&year_from=&year_to=&hours_from=&hours_to=&certified_ad_of=");
+                    _scrapBrowser.Navigate($"https://www.atc-trader.com/suchergebnis.php?typ={query}&ft_search=1&rewriting=none&lang2=en&dealer=atctrader&orderby=preis&aufabsteigend=desc&ft_search=1&offset={(page-1)*25}");
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace AgroAdd.Services.Scrappers
             var results = new List<Advertisement>();
             try
             {
-                ads = _scrapBrowser.Document.ElementsByClass("div", "list-item");
+                ads = _scrapBrowser.Document.ElementsByClass("div", "item-list");
                 if (!ads.Any())
                 {
                     AsyncScrapCompleted?.Invoke(this, results, false, null);
@@ -93,7 +93,7 @@ namespace AgroAdd.Services.Scrappers
             {
                 foreach (var add in ads)
                 {
-                    var info = add.ElementsByClass("div", "padded-box-horizontal")?.FirstOrDefault();
+                    var info = add.ElementsByClass("div", "add-details")?.FirstOrDefault();
                     if (info == null)
                         continue;
                     var title = SafeExtrctTitle(info);
@@ -123,12 +123,15 @@ namespace AgroAdd.Services.Scrappers
                         }
                     }
                     if (continueFlag) continue;
-                    var price = info.ElementsByClass("span", "priceStr")?.FirstOrDefault()?.InnerText;
-                    if (price.ToUpper() == "PREIS AUF ANFRAGE")
-                        price = "POA";
+                    var price = add.ElementsByClass("h3", "item-price-small")?.FirstOrDefault()?.InnerText;
+                    var priceTax = add.ElementsByClass("h2", "item-price")?.FirstOrDefault()?.InnerText;
+                    if (priceTax != null && priceTax.ToUpper() == "PRICE ON APPLICATION")
+                    {
+                        price = "PAO";
+                    }
                     else
                     {
-                        price = price.Replace(",", "").Replace("€", "").Replace(".", "");
+                        price = price.Replace(",", "").Replace("€", "").Replace(".", "").Replace("Net", "");
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
                         {
                             price = decimalPrice.ToString("### ###") + " €";
@@ -138,15 +141,12 @@ namespace AgroAdd.Services.Scrappers
                                 continue;
                         }
                     }
-                    var description = info.ElementsByClass("div", "desc").FirstOrDefault()?.InnerText;
-                    var divImg = add.ElementsByClass("div", "image")?.FirstOrDefault();
+                    var description = add.ElementsByClass("span", "info-row").FirstOrDefault()?.InnerText;
+                    var divImg = add.ElementsByClass("div", "add-image")?.FirstOrDefault();
                     var src = SafeExtractSrc(divImg);
                     if (src == "")
                         src = "http://www.pinnacleeducations.in/wp-content/uploads/2017/05/no-image.jpg";
-                    else if (!src.Contains("http"))
-                        src = "https://www.atc-trader.com" + src;
                     var href = SafeExtractHref(add);
-
                     results.Add(new Advertisement
                     {
                         Name = title,
@@ -179,11 +179,15 @@ namespace AgroAdd.Services.Scrappers
         {
             try
             {
-                var pagination = document.ElementsByClass("div", "pagination")?.FirstOrDefault();
-                if (pagination.ElementsByClass("a", "next")?.FirstOrDefault()?.InnerText != null)
-                    return true;
-                else
-                    return false;
+                var pagination = document.ElementsByClass("ul", "pagination")?.FirstOrDefault();
+                var pages = pagination.GetElementsByTagName("li");
+                bool found = false;
+                foreach (HtmlElement page in pages)
+                {
+                    if (page.InnerText.Contains(">"))
+                        found = true;
+                }
+                return found;
             }
             catch (Exception ex)
             {
@@ -207,11 +211,11 @@ namespace AgroAdd.Services.Scrappers
                 return null;
             if (el.Count == 0)
                 return null;
-            return el[0].GetAttribute("data-original");
+            return el[0].GetAttribute("src");
         }
         private string SafeExtrctTitle(HtmlElement simpleAdd)
         {
-            var el = simpleAdd?.GetElementsByTagName("h2");
+            var el = simpleAdd?.GetElementsByTagName("a");
             if (el == null)
                 return null;
             if (el.Count == 0)
