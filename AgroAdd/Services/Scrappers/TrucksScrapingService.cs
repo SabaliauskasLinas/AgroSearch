@@ -53,9 +53,9 @@ namespace AgroAdd.Services.Scrappers
             try
             {
                 if (page < 2)
-                    _scrapBrowser.Navigate($"https://www.trucks.nl/zoeken/?category=farm&freetext={query}");
+                    _scrapBrowser.Navigate($"https://www.trucksnl.com/agricultural-machinery?q={query}");
                 else
-                    _scrapBrowser.Navigate($"https://www.trucks.nl/zoeken/?page={page}&category=farm&freetext={query}");
+                    _scrapBrowser.Navigate($"https://www.trucksnl.com/agricultural-machinery?q={query}&page={page}");
             }
             catch (Exception ex)
             {
@@ -75,17 +75,13 @@ namespace AgroAdd.Services.Scrappers
             IEnumerable<HtmlElement> cardsList = null;
             try
             {
-                var vechiles = _scrapBrowser.Document.GetElementById("mainVehicles");
-                if (vechiles != null)
-                {
-                    cardsList = vechiles.ElementsByClass("div","card");
-                    if (cardsList == null && !cardsList.Any())
-                    {
-                        AsyncScrapCompleted?.Invoke(this, results, false, null);
-                        return;
-                    }
-                }
 
+                cardsList = _scrapBrowser.Document.ElementsByClass("div", "advertisement-list-item");
+                if (cardsList == null && !cardsList.Any())
+                {
+                     AsyncScrapCompleted?.Invoke(this, results, false, null);
+                    return;
+                }
             }
             catch (Exception ex)
             {
@@ -99,9 +95,7 @@ namespace AgroAdd.Services.Scrappers
 
                 foreach (var cardelement in cardsList)
                 {
-                    var info = cardelement.ElementsByClass("div", "info")?.FirstOrDefault();
-                    var title = info.ElementsByClass("span", "brand")?.FirstOrDefault()?.InnerText + " " +
-                        info.ElementsByClass("span", "type")?.FirstOrDefault()?.InnerText;
+                    var title = cardelement.ElementsByClass("a", "card-title").FirstOrDefault().InnerText;
                     bool continueFlag = false;
                     bool breakFlag = false;
                     //Checking if title contains each request text word
@@ -128,16 +122,13 @@ namespace AgroAdd.Services.Scrappers
                         }
                     }
                     if (continueFlag) continue;
-                    var detailedinformation = cardelement.ElementsByClass("div", "detailedinformation")?.FirstOrDefault();
-                    var price = detailedinformation.ElementsByClass("div", "price")?.FirstOrDefault()?.InnerText;
+                    var price = cardelement.ElementsByClass("p", "card-text")?.FirstOrDefault()?.InnerText;
+                    int trashIndex = price.LastIndexOf('\n');
+                    price = price.Substring(trashIndex+1);
                     if (!string.IsNullOrWhiteSpace(price))
                     {
-                        if (price.ToLower().Contains("op aanvraag"))
-                            price = "On Request";
-                        else if (price.ToLower().Contains("bieden"))
-                            price = "Offer";
-                        else if (price.ToLower().Contains("vaste prijs"))
-                            price = "Fixed Price";
+                        if (!Regex.IsMatch(price, @"^€[0-9]"))
+                            price = "PAO";
                         else
                         {
                             price = price.Replace("Prijs: ", "").Replace(".", "").Replace(",", "").Replace("€", "").Replace("-", "").Replace(" ", "");
@@ -150,18 +141,12 @@ namespace AgroAdd.Services.Scrappers
                                     continue;
                             }
                         }
-
                     }
                     else
                         price = "PAO";
-                    var description = detailedinformation.ElementsByClass("div", "year")?.FirstOrDefault()?.InnerText + "\n" + 
-                        detailedinformation.ElementsByClass("div", "custom")?.FirstOrDefault()?.InnerText + "\n" + 
-                        detailedinformation.ElementsByClass("div", "dealername")?.FirstOrDefault()?.InnerText;
-                    var divSrc = cardelement.ElementsByClass("div", "image")?.FirstOrDefault().ElementsByClass("div","single")?.FirstOrDefault();
-                    var src = SafeExtractSrc(divSrc);
-                    if (src != null && src[0] != 'h')
-                        src = "https://www.trucks.nl" + src;
-                    else if (src == null || src == " " || src == "")
+                    var description = cardelement.ElementsByClass("ul", "list-properties")?.FirstOrDefault()?.InnerText;
+                    var src = SafeExtractSrc(cardelement);
+                    if (src == null || src == " " || src == "")
                         src = "Images/noimage.png";
                     var href = SafeExtractHref(cardelement);
 
@@ -174,7 +159,8 @@ namespace AgroAdd.Services.Scrappers
                         PageUrl = href,
                     });
                 }
-                var hasMorePages = ScrapHasMorePages(_scrapBrowser.Document);
+                var pagination = _scrapBrowser.Document.ElementsByClass("ul", "pagination").FirstOrDefault();
+                var hasMorePages = ScrapHasMorePages(pagination);
                 _scrapDone = true;
                 AsyncScrapCompleted?.Invoke(this, results, hasMorePages, null);
             }
@@ -185,27 +171,17 @@ namespace AgroAdd.Services.Scrappers
             }
         }
 
-        private bool ScrapHasMorePages(HtmlDocument document)
+        private bool ScrapHasMorePages(HtmlElement htmlElement)
         {
-            try
+            var pageItemCount = htmlElement.ElementsByClass("li", "page-item").ToList().Count;
+            var pageItems = htmlElement.ElementsByClass("li", "page-item").ToList();
+            while (pageItemCount != 0)
             {
-                var pagination = document.ElementsByClass("ul", "paginationcontainer")?.FirstOrDefault();
-                return HasNextPageIndicator(pagination);
+                if (pageItems[pageItemCount - 1].InnerText.ToUpper().Contains("NEXT"))
+                    return true;
+                pageItemCount--;
             }
-            catch (Exception ex)
-            {
-                _loggingService.LogException(ex, "Failed to parse pagination");
-                return false;
-            }
-        }
-
-        private bool HasNextPageIndicator(HtmlElement paginationElement)
-        {
-            var arrow = paginationElement.ElementsByClass("li", "arrow")?.FirstOrDefault();
-            if (arrow?.InnerText == ">")
-                return true;
-            else
-                return false;
+            return false;
         }
         private string SafeExtractHref(HtmlElement simpleAdd)
         {
@@ -218,12 +194,14 @@ namespace AgroAdd.Services.Scrappers
         }
         private string SafeExtractSrc(HtmlElement simpleAdd)
         {
-            var el = simpleAdd?.GetElementsByTagName("source");
+            var el = simpleAdd?.GetElementsByTagName("img");
             if (el == null)
                 return null;
             if (el.Count == 0)
                 return null;
-            return el[0].GetAttribute("srcset");
+            if (el[0].GetAttribute("src") == null || el[0].GetAttribute("src") == "")
+                return el[0].GetAttribute("data-src");
+            return el[0].GetAttribute("src");
         }
 
     }
