@@ -1,0 +1,72 @@
+||								    ||
+||	            _____                               	    ||
+||	           /  _  \    ___________  ____         	    ||
+||	          /  /_\  \  / ___\_  __ \/  _ \        	    ||
+||	         /    |    \/ /_/  >  | \(  <_> )       	    ||
+||	         \____|__  /\___  /|__|   \____/        	    ||
+||	                 \//_____/                      	    ||
+||	    _________                           .__     	    ||
+||	   /   _____/ ____ _____ _______   ____ |  |__  	    ||
+||	   \_____  \_/ __ \\__  \\_  __ \_/ ___\|  |  \ 	    ||
+||	   /        \  ___/ / __ \|  | \/\  \___|   Y  \	    ||
+||	  /_______  /\___  >____  /__|    \___  >___|  /	    ||
+||	          \/     \/     \/            \/     \/  	    ||
+||								    ||
+||1. Programa atlieka paieðka pagal ávestà gamintojo/modelio        ||
+||       pavadinimà.                                                ||                                                
+||	~Svetainëse su þvaigþdute modelio pavadinimas nefiguruoja.  ||
+||								    ||
+||2. Paieðkai reikalinga bent 1 svetainë.			    ||
+||	~Didelis svetainiø kiekis gali:				    ||
+||		a) Sulëtinti paieðkà.				    ||
+||		b) Apkrauti atmintá ir procesoriø.		    ||
+||	(Todël rekomenduojama vengti dideliø svetainiø kiekio)      ||
+||								    ||
+||3. Automatiðkai atfiltruojami skelbimai nuo 5000 eurø.            ||
+||      ~Iðskyrus aukcionams.  	                                    ||
+||	~Tà galima pakeisti skiltelëje "Nuo".			    ||
+||	~Taip pat galima pridët kainos limità skiltelëje "Iki".	    ||
+||	~Skelbimai be kainos nëra atfiltruojami, uþdedamas "PAO".   ||
+||								    ||
+||4. Galimas rikiavimas pagal kainà:				    ||
+||		a) Pigiausi virðuje (PAO pabaigoje)	    	    ||
+||		b) Brangiausi virðuje (PAO pradþioje)		    ||
+||								    ||
+||5. Jei svetainë neatsako pernelyg ilgai yra svetainës perkrovimas.||
+||	~Perkraunama tik uþstrigusi svetainë.			    ||
+||	~Prie uþstrigusios svetainës atsiranda "rr".		    ||
+||								    ||
+||6. Didysis skaièius nurodo didþiojo puslapio numerá.		    ||
+||	~T.y. svetainëje esantis puslapis.			    ||
+||								    ||
+||7. Maþasis skaièius nurodo maþàjá puslapá ið jo kiekio.	    ||
+||	~T.y. suskirstymas kas 30 skelbimø á maþuosius puslapius.   ||
+||	~Tai yra daroma dël atminties tausojimo.		    ||
+||								    ||
+||8. Kairëjë yra matoma pilka atminties naudojimo juostelë.	    ||
+||	~Ji nurodo kiek atminties ðiuo metu yra rezervuota.	    ||
+||	~Visa juostelë (iki virðaus) prilygsta 1 GB atminties.	    ||
+||								    ||
+||9. Ávykdþius ieðkojimo operacijà:				    ||
+||		a) Prie pasirinktø svetainiø atsiranda "..." ,tai   ||
+||			nurodo, kad svetainë dabar yra nagrinëjama. ||
+||		b) Uþsibaigus operacijai prie svetainiø atsiranda   ||
+||			rastø skelbimø skaièius ir varnelë.	    ||
+||		c) Jei prie svetainës atsiranda "+", tai ji turi    ||
+||			sekantá didájá puslapá.			    ||
+||		d) Jei prie svetainës atsiranda "ER", tai ávyko	    ||
+||			svetainës nagrinëjimo programinë klaida.    ||
+||								    ||
+||10. Naudojimo patogumui programa gali bûti valdoma mygtukais:     ||
+||		a) Rodyklës á apaèià/virðø valdo slinkties juostà   ||
+||			pagal skelbimus.			    ||
+||			(Navigatorius ðvelniai apibraukia skelbimà) ||
+||		b) Rodykës á kairæ/deðinæ naviguoja maþuosius       ||
+||			puslapius.				    ||
+||		c) Skaièiai 1 ir 3 naviguoja didþiuosius puslapius. ||
+||__________________________________________________________________||
+
+Skelbimø radimo greitis priklauso nuo (pagal svarbà):
+• Procesoriaus (CPU).
+• Interneto greièio.
+• Vidinio kietojo disko greièio ir jo bûklës.
