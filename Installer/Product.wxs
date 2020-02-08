@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="AgroSearch" Language="1033" Version="4.0" Manufacturer='UAB "Erlin"' UpgradeCode="243A3695-2B24-46C4-BF89-4AD464244C7F">
+  <Product Id="*" Name="AgroSearch" Language="1033" Version="4.2" Manufacturer='UAB "Erlin"' UpgradeCode="243A3695-2B24-46C4-BF89-4AD464244C7F">
 
     <Package InstallerVersion="400" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
