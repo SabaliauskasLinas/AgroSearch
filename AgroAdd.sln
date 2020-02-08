@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2035
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroAdd", "AgroAdd\AgroAdd.csproj", "{5C2363B3-D21A-4C4D-9A94-3A5E9024A156}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "SetupProject1\Installer.wixproj", "{1155E1B0-83C3-4185-8B80-136DB628F838}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "Installer\Installer.wixproj", "{1155E1B0-83C3-4185-8B80-136DB628F838}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -36,7 +36,7 @@ namespace AgroAdd.Services
                 //new TrattoriSupermarketScrapingService(loggingService),
                 new LandwirtScrapingService(loggingService,currencyApy),
                 new TrucksScrapingService(loggingService),
-                new BvaauctionsScrapingService(loggingService),
+                //new BvaauctionsScrapingService(loggingService),
                 new EpicauctionsScrapingService(loggingService),
                 new KlaravikScrapingService(loggingService),
                 //new TroostwijkauctionsScrapingService(loggingService),

@@ -99,7 +99,7 @@ namespace AgroAdd.Services.Scrappers
                     if (add == ads[0])
                         continue;
                     var price = add.ElementsByClass("TD", "col_Price")?.FirstOrDefault()?.InnerText;
-                    if (price == "Call Us")
+                    if (price.ToUpper().Contains("CALL US"))
                         price = "POA";
                     else
                     {

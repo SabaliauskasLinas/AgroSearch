@@ -99,7 +99,7 @@ namespace AgroAdd.Services.Scrappers
                     if (add == ads[0])
                         continue;
                     var price = add.ElementsByClass("TD", "col_Price")?.FirstOrDefault()?.InnerText;
-                    if (price == "Call Us")
+                    if (price.ToUpper().Contains("CALL US"))
                         price = "POA";
                     else
                     {
@@ -114,11 +114,8 @@ namespace AgroAdd.Services.Scrappers
                                 continue;
                         }
                     }
-                    var description = "HP: " + add.ElementsByClass("TD", "col_HP")?.FirstOrDefault()?.InnerText + "\n"
-                        + "Year: " + add.ElementsByClass("TD", "col_Year")?.FirstOrDefault()?.InnerText + "\n"
-                        + "Hours: " + add.ElementsByClass("TD", "col_Hours")?.FirstOrDefault()?.InnerText + "\n"
-                        + "Trans: " + add.ElementsByClass("TD", "col_Trans")?.FirstOrDefault()?.InnerText + "\n"
-                        + "Speed: " + add.ElementsByClass("TD", "col_Speed")?.FirstOrDefault()?.InnerText;
+                    var description = "Year: " + add.ElementsByClass("TD", "col_Year")?.FirstOrDefault()?.InnerText + "\n"
+                        + "Width: " + add.ElementsByClass("TD", "col_Width")?.FirstOrDefault()?.InnerText;
                     var hreftd = add.ElementsByClass("TD", "viewMoreButton")?.FirstOrDefault();
                     var href = SafeExtractHref(hreftd);
                     if (href != null && href[0] != 'h')
