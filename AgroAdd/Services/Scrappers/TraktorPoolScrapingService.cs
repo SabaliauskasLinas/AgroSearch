@@ -53,9 +53,9 @@ namespace AgroAdd.Services.Scrappers
             try
             {
                 if (page < 2)
-                    _scrapBrowser.Navigate($"https://www.traktorpool.de/gebraucht/b-Traktoren/95/keywords/{query}/results/50/sortby/score/");
+                    _scrapBrowser.Navigate($"https://www.traktorpool.de/gebraucht/?q={query}&machine_world_id=0");
                 else
-                    _scrapBrowser.Navigate($"https://www.traktorpool.de/gebraucht/b-Traktoren/95/keywords/{query}/page/{page}/results/50/sortby/score/");
+                    _scrapBrowser.Navigate($"https://www.traktorpool.de/gebraucht/page/{page}/q/{query}/sortby/score/?q={query}");
             }
             catch (Exception ex)
             {
