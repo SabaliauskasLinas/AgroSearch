@@ -84,13 +84,14 @@ namespace AgroAdd.Services.Scrappers
                 foreach (var add in ads)
                 {
                     var label = add.ElementsByClass("div", "img-wrapper")?.FirstOrDefault()?.InnerText;
-
+                    if (label == null)
+                        continue;
                     if (label != null)
                         if (label.Contains("Sold"))
                             continue;
                     var wrapper = add.ElementsByClass("div", "wrapper")?.FirstOrDefault();
                     var price = wrapper.ElementsByClass("div", "price")?.FirstOrDefault()?.InnerText;
-                    if (price != "PAO")
+                    if (price != "POA")
                     {
                         price = price.Replace(" ", "").Replace(",", "").Replace("€", "").Replace(".","").Replace("-","");
                         if (decimal.TryParse(price, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal decimalPrice))
