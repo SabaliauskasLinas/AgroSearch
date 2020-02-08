@@ -96,7 +96,7 @@ namespace AgroAdd.Services.Scrappers
             var results = new List<Advertisement>();
             try
             {
-                var adsParent = _scrapBrowser.Document.GetElementById("treffertabelle");
+                var adsParent = _scrapBrowser.Document.GetElementById("list_view");
                 ads = adsParent?.ElementsByClass("div","gmmtreffer");
                 if (ads == null || !ads.Any())
                 {
@@ -167,8 +167,7 @@ namespace AgroAdd.Services.Scrappers
                                 continue;
                         }
                     }
-                    var divImg = add.ElementsByClass("div", "col-xs-4")?.FirstOrDefault();
-                    var src = SafeExtractSrc(divImg);
+                    var src = SafeExtractSrc(add);
                     if (src == null || src == " " || src == "")
                         src = "Images/noimage.png";
                     var href = SafeExtractHref(add);
@@ -225,12 +224,9 @@ namespace AgroAdd.Services.Scrappers
         }
         private string SafeExtractSrc(HtmlElement simpleAdd)
         {
-            var el = simpleAdd?.GetElementsByTagName("img");
-            if (el == null)
-                return null;
-            if (el.Count == 0)
-                return null;
-            return el[0].GetAttribute("data-original");
+            Regex regex = new Regex(@"(?<=\bdata-original="")[^""]*");
+            Match match = regex.Match(simpleAdd.InnerHtml);
+            return match.Value;
         }
     }
 }
