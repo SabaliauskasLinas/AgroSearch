@@ -1,0 +1,5 @@
+C:\Users\Linis\source\repos\AgroAdd\AgroAdd\bin\Debug\AgroAdd.exe
+C:\Users\Linis\source\repos\AgroAdd\AgroAdd\bin\Debug\AgroAdd.exe.config
+C:\Users\Linis\source\repos\AgroAdd\AgroAdd\bin\Debug\Images\logo.png
+C:\Users\Linis\source\repos\AgroAdd\AgroAdd\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Linis\source\repos\AgroAdd\AgroAdd\bin\Debug\Images\noimage.png

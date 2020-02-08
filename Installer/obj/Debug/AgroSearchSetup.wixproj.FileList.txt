@@ -1,0 +1,6 @@
+C:\Users\Linis\source\repos\AgroAdd\SetupProject1\bin\Debug\SetupProject1.msi
+C:\Users\Linis\source\repos\AgroAdd\SetupProject1\bin\Debug\SetupProject1.wixpdb
+obj\Debug\Product.wixobj
+obj\Debug\AgroSearchSetup.wixproj.BindContentsFileListnull.txt
+obj\Debug\AgroSearchSetup.wixproj.BindOutputsFileListnull.txt
+obj\Debug\AgroSearchSetup.wixproj.BindBuiltOutputsFileListnull.txt

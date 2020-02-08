@@ -1,0 +1,2 @@
+C:\Users\Linis\source\repos\AgroAdd\SetupProject1\bin\Debug\AgroSearch.msi
+C:\Users\Linis\source\repos\AgroAdd\SetupProject1\bin\Debug\AgroSearch.wixpdb

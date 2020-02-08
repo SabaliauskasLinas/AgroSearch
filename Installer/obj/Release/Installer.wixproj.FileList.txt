@@ -1,0 +1,8 @@
+C:\Users\Linis\source\repos\AgroAdd\SetupProject1\bin\Release\AgroSearch.msi
+C:\Users\Linis\source\repos\AgroAdd\SetupProject1\bin\Release\AgroSearch.wixpdb
+obj\Release\Product.wixobj
+obj\Release\Installer.wixproj.BindContentsFileListnull.txt
+obj\Release\Installer.wixproj.BindOutputsFileListnull.txt
+obj\Release\Installer.wixproj.BindBuiltOutputsFileListnull.txt
+C:\Users\Linis\source\repos\AgroAdd\Installer\bin\Release\AgroSearch.msi
+C:\Users\Linis\source\repos\AgroAdd\Installer\bin\Release\AgroSearch.wixpdb
